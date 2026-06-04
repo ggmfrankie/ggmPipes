@@ -1,0 +1,13 @@
+{
+  "itemGroup.ggmpipes": "Example Mod Tab",
+  "block.ggmpipes.example_block": "Example Block",
+  "item.ggmpipes.example_item": "Example Item",
+
+  "ggmpipes.configuration.title": "ggmPipes Configs",
+  "ggmpipes.configuration.section.ggmpipes.common.toml": "ggmPipes Configs",
+  "ggmpipes.configuration.section.ggmpipes.common.toml.title": "ggmPipes Configs",
+  "ggmpipes.configuration.items": "Item List",
+  "ggmpipes.configuration.logDirtBlock": "Log Dirt Block",
+  "ggmpipes.configuration.magicNumberIntroduction": "Magic Number Text",
+  "ggmpipes.configuration.magicNumber": "Magic Number"
+}
