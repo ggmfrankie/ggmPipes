@@ -32,7 +32,6 @@ public class ggmPipes {
     public ggmPipes(IEventBus modEventBus, ModContainer modContainer) {
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
-        //NeoForge.EVENT_BUS.addListener(ggmPipes::onLivingJump);
 
         // Register the Deferred Register to the mod event bus so blocks get registered
         ModBlocks.register(modEventBus);

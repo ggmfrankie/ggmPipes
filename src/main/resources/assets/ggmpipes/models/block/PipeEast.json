@@ -1,0 +1,22 @@
+{
+	"format_version": "1.21.11",
+	"credit": "Made with Blockbench",
+	"textures": {
+		"0": "item/PipeEast",
+		"particle": "item/PipeEast"
+	},
+	"elements": [
+		{
+			"from": [10.5, 5.5, 5.5],
+			"to": [16, 10.5, 10.5],
+			"faces": {
+				"north": {"uv": [0, 0, 6, 5], "texture": "#0"},
+				"east": {"uv": [0, 10, 5, 15], "texture": "#0"},
+				"south": {"uv": [0, 5, 6, 10], "texture": "#0"},
+				"west": {"uv": [5, 10, 10, 15], "texture": "#0"},
+				"up": {"uv": [12, 5, 6, 0], "texture": "#0"},
+				"down": {"uv": [12, 5, 6, 10], "texture": "#0"}
+			}
+		}
+	]
+}
