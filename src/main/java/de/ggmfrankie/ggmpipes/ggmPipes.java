@@ -1,7 +1,8 @@
-package com.ggmfrankie.ggmpipes;
+package de.ggmfrankie.ggmpipes;
 
-import com.ggmfrankie.ggmpipes.Registry.ModBlocks;
-import com.ggmfrankie.ggmpipes.Registry.ModItems;
+import de.ggmfrankie.ggmpipes.registry.ModBlockEntities;
+import de.ggmfrankie.ggmpipes.registry.ModBlocks;
+import de.ggmfrankie.ggmpipes.registry.ModItems;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -35,7 +36,9 @@ public class ggmPipes {
 
         // Register the Deferred Register to the mod event bus so blocks get registered
         ModBlocks.register(modEventBus);
+        ModBlockEntities.register(modEventBus);
         ModItems.register(modEventBus);
+
 
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (ggmPipes) to respond directly to events.
@@ -72,13 +75,6 @@ public class ggmPipes {
         // Only heal on the server side
         if (!entity.level().isClientSide()) {
             entity.heal(1);
-        }
-    }
-
-    @SubscribeEvent
-    private void onBlockRightClick(PlayerInteractEvent.RightClickBlock event){
-        if(event.getLevel().getBlockState(event.getPos()).is(ModBlocks.EXAMPLE_BLOCK)){
-            System.out.println("Clicked on my block");
         }
     }
 }

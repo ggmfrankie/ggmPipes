@@ -2,13 +2,13 @@
 	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "item/PipeSouth",
-		"particle": "item/PipeSouth"
+		"0": "ggmpipes:block/pipe_north",
+		"particle": "ggmpipes:block/pipe_north"
 	},
 	"elements": [
 		{
-			"from": [5.5, 5.5, 10.5],
-			"to": [10.5, 10.5, 16],
+			"from": [5.5, 5.5, 0],
+			"to": [10.5, 10.5, 5.5],
 			"faces": {
 				"north": {"uv": [0, 10, 5, 15], "texture": "#0"},
 				"east": {"uv": [0, 0, 6, 5], "texture": "#0"},

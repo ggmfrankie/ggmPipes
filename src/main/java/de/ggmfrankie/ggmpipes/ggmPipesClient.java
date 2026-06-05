@@ -1,4 +1,4 @@
-package com.ggmfrankie.ggmpipes;
+package de.ggmfrankie.ggmpipes;
 
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;

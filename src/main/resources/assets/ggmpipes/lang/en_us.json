@@ -1,7 +1,6 @@
 {
-  "itemGroup.ggmpipes": "Example Mod Tab",
-  "block.ggmpipes.example_block": "Example Block",
-  "item.ggmpipes.example_item": "Example Item",
+  "itemGroup.ggmpipes": "ggmPipes",
+  "item.ggmpipes.item_pipe_block": "Item Pipe",
 
   "ggmpipes.configuration.title": "ggmPipes Configs",
   "ggmpipes.configuration.section.ggmpipes.common.toml": "ggmPipes Configs",

@@ -2,13 +2,13 @@
 	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "item/PipeUp",
-		"particle": "item/PipeUp"
+		"0": "ggmpipes:block/pipe_down",
+		"particle": "ggmpipes:block/pipe_down"
 	},
 	"elements": [
 		{
-			"from": [5.5, 10.5, 5.5],
-			"to": [10.5, 16, 10.5],
+			"from": [5.5, 0, 5.5],
+			"to": [10.5, 5.5, 10.5],
 			"rotation": {"angle": 0, "axis": "y", "origin": [-5, 0, 0]},
 			"faces": {
 				"north": {"uv": [0, 0, 5, 6], "texture": "#0"},

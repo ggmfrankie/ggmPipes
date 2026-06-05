@@ -1,8 +1,9 @@
-package com.ggmfrankie.ggmpipes.Items;
+package de.ggmfrankie.ggmpipes.items.blockentity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
@@ -12,16 +13,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import static net.minecraft.world.level.block.BaseFireBlock.getState;
 
 public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock, EntityBlock {
 
@@ -31,11 +31,11 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
     public static final BooleanProperty SOUTH = BooleanProperty.create("south");
     public static final BooleanProperty WEST = BooleanProperty.create("west");
     public static final BooleanProperty EAST = BooleanProperty.create("east");
-    public static final BooleanProperty HAS_DATA = BooleanProperty.create("has_data");
+    public static final BooleanProperty HAS_MACHINE_CONNECTION = BooleanProperty.create("has_machine_connection");
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     public PipeBlock(Properties properties) {
-        super(properties.mapColor(MapColor.COLOR_GRAY).strength(0.5F).sound(SoundType.METAL).pushReaction(PushReaction.BLOCK));
+        super(properties);
 
         this.registerDefaultState(stateDefinition.any()
                 .setValue(UP, false)
@@ -44,7 +44,7 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
                 .setValue(SOUTH, false)
                 .setValue(EAST, false)
                 .setValue(WEST, false)
-                .setValue(HAS_DATA, false)
+                .setValue(HAS_MACHINE_CONNECTION, false)
                 .setValue(WATERLOGGED, false)
         );
     }
@@ -103,13 +103,47 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
                 SOUTH,
                 WEST,
                 EAST,
-                HAS_DATA,
+                HAS_MACHINE_CONNECTION,
                 WATERLOGGED
         );
     }
 
+    private boolean canConnect(Level level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+
+        return state.getBlock() instanceof PipeBlock;
+    }
+
+    private BlockState getState(Level level, BlockPos pos){
+        return this.defaultBlockState()
+                .setValue(NORTH, canConnect(level, pos.north()))
+                .setValue(SOUTH, canConnect(level, pos.south()))
+                .setValue(EAST,  canConnect(level, pos.east()))
+                .setValue(WEST,  canConnect(level, pos.west()))
+                .setValue(UP,    canConnect(level, pos.above()))
+                .setValue(DOWN,  canConnect(level, pos.below()));
+    }
+
     @Override
-    @Nullable
+    @NullMarked
+    public void neighborChanged(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Block neighborBlock,
+            @Nullable Orientation orientation,
+            boolean movedByPiston
+    ) {
+        if (!level.isClientSide()) {
+            BlockState newState = getState(level, pos);
+
+            if (!newState.equals(state)) {
+                level.setBlock(pos, newState, Block.UPDATE_ALL);
+            }
+        }
+    }
+
+    @Override
     @NullMarked
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return getState(context.getLevel(), context.getClickedPos());
@@ -117,7 +151,5 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
 
     @Override
     @NullMarked
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return null;
-    }
+    public abstract @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState);
 }

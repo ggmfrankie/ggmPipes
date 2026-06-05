@@ -2,8 +2,8 @@
 	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "item/PipeCenter",
-		"particle": "item/PipeCenter"
+		"0": "ggmpipes:block/pipe_center",
+		"particle": "ggmpipes:block/pipe_center"
 	},
 	"elements": [
 		{
