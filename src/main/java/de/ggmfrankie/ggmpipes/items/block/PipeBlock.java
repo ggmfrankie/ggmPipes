@@ -1,20 +1,18 @@
-package de.ggmfrankie.ggmpipes.items.blockentity;
+package de.ggmfrankie.ggmpipes.items.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.material.MapColor;
-import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -76,7 +74,7 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
         return shapes;
     }
 
-    private static int getMask(BlockState state){
+    public static int calculateMask(BlockState state){
         int mask = 0;
         if (state.getValue(NORTH)) mask |= 1;
         if (state.getValue(SOUTH)) mask |= 2;
@@ -91,7 +89,7 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
     @Override
     @NullMarked
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-        return SHAPES[getMask(state)];
+        return SHAPES[calculateMask(state)];
     }
 
     @Override
@@ -108,20 +106,31 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
         );
     }
 
-    private boolean canConnect(Level level, BlockPos pos) {
-        BlockState state = level.getBlockState(pos);
-
-        return state.getBlock() instanceof PipeBlock;
-    }
+    protected abstract boolean canConnect(Level level, BlockPos pos, Direction dir);
+    protected abstract boolean hasMachineConnection(Level level, BlockPos pos);
 
     private BlockState getState(Level level, BlockPos pos){
         return this.defaultBlockState()
-                .setValue(NORTH, canConnect(level, pos.north()))
-                .setValue(SOUTH, canConnect(level, pos.south()))
-                .setValue(EAST,  canConnect(level, pos.east()))
-                .setValue(WEST,  canConnect(level, pos.west()))
-                .setValue(UP,    canConnect(level, pos.above()))
-                .setValue(DOWN,  canConnect(level, pos.below()));
+                .setValue(NORTH, canConnect(level, pos.north(), Direction.NORTH))
+                .setValue(SOUTH, canConnect(level, pos.south(), Direction.SOUTH))
+                .setValue(EAST,  canConnect(level, pos.east(),  Direction.EAST))
+                .setValue(WEST,  canConnect(level, pos.west(),  Direction.WEST))
+                .setValue(UP,    canConnect(level, pos.above(), Direction.UP))
+                .setValue(DOWN,  canConnect(level, pos.below(), Direction.DOWN));
+    }
+
+    public static Direction[] getPipeConnections(BlockState state){
+        var directions = new Direction[6];
+        int count = 0;
+
+        if (state.getValue(NORTH)) directions[count++] = Direction.NORTH;
+        if (state.getValue(SOUTH)) directions[count++] = Direction.SOUTH;
+        if (state.getValue(EAST))  directions[count++] = Direction.EAST;
+        if (state.getValue(WEST))  directions[count++] = Direction.WEST;
+        if (state.getValue(UP))    directions[count++] = Direction.UP;
+        if (state.getValue(DOWN))  directions[count]   = Direction.DOWN;
+
+        return directions;
     }
 
     @Override
