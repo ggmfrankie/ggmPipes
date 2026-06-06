@@ -1,7 +1,18 @@
 Documentation: https://docs.neoforged.net/docs
 
-Registry for creating new items
+#TODO
 
-Client/Server -> Level.isClientSide() FMLEnvironment.getDist()
+[ ] Network processing
 
+[ ] Optimize Network processing
 
+[ ] TileEntity unload 
+
+[ ] TileEntity creation on machine placement
+
+[ ] TileEntity creation on pipe next to machine placement
+
+[ ] Network recalculation on pipe break
+
+[ ] Network recalculation on machine break
+    
