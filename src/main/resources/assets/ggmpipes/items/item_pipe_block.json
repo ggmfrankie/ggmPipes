@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "ggmpipes:block/pipe_center"
+    "model": "ggmpipes:item/item_pipe_block"
   }
 }
