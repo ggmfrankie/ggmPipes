@@ -1,20 +1,25 @@
 package de.ggmfrankie.ggmpipes.items.block;
 
+import com.mojang.serialization.MapCodec;
 import de.ggmfrankie.ggmpipes.items.tileentity.PipeEntity;
 import de.ggmfrankie.ggmpipes.utils.DirectionMask;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -27,6 +32,8 @@ import java.util.List;
 
 
 public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock, EntityBlock {
+
+
 
     public static final BooleanProperty DOWN = BooleanProperty.create("down");
     public static final BooleanProperty UP = BooleanProperty.create("up");
@@ -93,6 +100,12 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
 
     @Override
     @NullMarked
+    protected RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL;
+    }
+
+    @Override
+    @NullMarked
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
         return SHAPES[calculateMask(state)];
     }
@@ -154,10 +167,15 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
 
         var entity = level.getBlockEntity(pos);
         if (entity instanceof PipeEntity pipeEntity) {
-            pipeEntity.onNeighborChanged();
+            newState = pipeEntity.onNeighborChanged(newState);
         }
         level.setBlock(pos, newState, Block.UPDATE_CLIENTS);
-        level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
+    }
+
+    @Override
+    @NullMarked
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, ItemStack toolStack, boolean willHarvest, FluidState fluid) {
+        return super.onDestroyedByPlayer(state, level, pos, player, toolStack, willHarvest, fluid);
     }
 
     @Override

@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
@@ -34,7 +35,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import static de.ggmfrankie.ggmpipes.items.render.ItemPipeModels.PipeModel;
 
 @EventBusSubscriber(value = Dist.CLIENT)
-public abstract class PipeRenderer implements BlockEntityRenderer<PipeEntity, PipeRenderState> {
+public abstract class PipeRenderer implements BlockEntityRenderer<PipeEntity, PipeRenderer.PipeRenderState> {
+
+    public static class PipeRenderState extends BlockEntityRenderState {
+        public int connectionMask;
+    }
 
     protected Minecraft minecraft;
     protected final AtomicReference<QuadCollection> cachedModel;

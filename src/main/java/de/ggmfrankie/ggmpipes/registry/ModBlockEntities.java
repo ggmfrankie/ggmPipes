@@ -19,7 +19,6 @@ public class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register("pipe_block_entity",
                     () -> new BlockEntityType<>(
                             ItemPipeEntity::new,
-                            false,
                             ModBlocks.ITEM_PIPE_BLOCK.get()
                     )
             );

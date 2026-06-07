@@ -1,10 +1,12 @@
 package de.ggmfrankie.ggmpipes.items.block;
 
+import com.mojang.serialization.MapCodec;
 import de.ggmfrankie.ggmpipes.items.tileentity.ItemPipeEntity;
 import de.ggmfrankie.ggmpipes.utils.CapabilityHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -14,6 +16,8 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 public class ItemPipeBlock extends PipeBlock {
+
+    public static final MapCodec<ItemPipeBlock> CODEC = simpleCodec(ItemPipeBlock::new);
 
     public ItemPipeBlock(Properties properties) {
         super(properties);
@@ -35,5 +39,11 @@ public class ItemPipeBlock extends PipeBlock {
     @Override
     protected boolean hasMachineConnection(Level level, BlockPos pos) {
         return 0 != CapabilityHelper.getMachineConnections(level, pos, CapabilityHelper::hasItemCapability);
+    }
+
+    @Override
+    @NullMarked
+    protected MapCodec<? extends Block> codec() {
+        return CODEC;
     }
 }
