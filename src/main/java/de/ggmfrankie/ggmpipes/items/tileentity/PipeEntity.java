@@ -2,12 +2,23 @@ package de.ggmfrankie.ggmpipes.items.tileentity;
 
 import de.ggmfrankie.ggmpipes.items.block.PipeBlock;
 import de.ggmfrankie.ggmpipes.utils.DirectionMask;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.*;
 
@@ -21,8 +32,18 @@ public abstract class PipeEntity extends BlockEntity {
 
     public PipeEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        connectionMask = PipeBlock.calculateMask(state);
+        connectionMask = 0;
         disabledMask = 0;
+        memberNetwork = null;
+    }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+
+        if (level != null) {
+            this.connectionMask = calculateConnectionMask(level, worldPosition);
+        }
     }
 
     public void disableSide(Direction direction){
@@ -38,21 +59,6 @@ public abstract class PipeEntity extends BlockEntity {
         }
     }
 
-    public Direction[] getPipeConnections(){
-        var directions = new Direction[6];
-        int mask = this.connectionMask;
-        int count = 0;
-
-        if ((mask & DirectionMask.NORTH) != 0) directions[count++] = Direction.NORTH;
-        if ((mask & DirectionMask.SOUTH) != 0) directions[count++] = Direction.SOUTH;
-        if ((mask & DirectionMask.EAST) != 0)  directions[count++] = Direction.EAST;
-        if ((mask & DirectionMask.WEST) != 0)  directions[count++] = Direction.WEST;
-        if ((mask & DirectionMask.UP) != 0)    directions[count++] = Direction.UP;
-        if ((mask & DirectionMask.DOWN) != 0)  directions[count]   = Direction.DOWN;
-
-        return directions;
-    }
-
     protected UUID getOrCreateNetwork(Level level, BlockPos start){
         Set<BlockPos> visited = new HashSet<>();
         Queue<BlockPos> queue = new ArrayDeque<>();
@@ -63,22 +69,70 @@ public abstract class PipeEntity extends BlockEntity {
         while (!queue.isEmpty()){
             BlockPos curr = queue.remove();
             BlockState state = level.getBlockState(curr);
-            Direction[] pipeConnections = PipeBlock.getPipeConnections(state);
+            List<Direction> pipeConnections = PipeBlock.getPipeConnections(state);
 
-            for (var dir : pipeConnections){
+            for (var dir : pipeConnections) {
                 BlockPos neighbor = curr.relative(dir);
 
                 if (visited.contains(neighbor)) continue;
 
-                if (level.getBlockEntity(neighbor) instanceof PipeEntity entity){
+                if (level.getBlockEntity(neighbor) instanceof PipeEntity entity) {
                     return entity.getMemberNetwork();
                 }
 
                 visited.add(neighbor);
-                queue.add(neighbor);
+
+                if (level.getBlockState(neighbor).getBlock() instanceof PipeBlock) queue.add(neighbor);
             }
         }
         return null;
+    }
+
+    protected abstract int calculateConnectionMask(Level level, BlockPos pos);
+
+    @Override
+    @NullMarked
+    protected void loadAdditional(ValueInput valueInput){
+        super.loadAdditional(valueInput);
+
+        disabledMask = valueInput.getIntOr("disabledMask", 0);
+
+        //memberNetwork = valueInput.read("memberNetwork", UUIDUtil.CODEC).orElse(null);
+    }
+
+    @Override
+    @NullMarked
+    protected void saveAdditional(ValueOutput valueOutput){
+        super.saveAdditional(valueOutput);
+
+        valueOutput.putInt("disabledMask", disabledMask);
+        valueOutput.putInt("connectionMask", connectionMask);
+        //if (memberNetwork != null) valueOutput.store("memberNetwork", UUIDUtil.CODEC, memberNetwork);
+    }
+
+    @Override
+    @NullMarked
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveWithFullMetadata(registries);
+    }
+
+    @Override
+    @NullMarked
+    public void handleUpdateTag(ValueInput input) {
+        super.handleUpdateTag(input);
+        connectionMask = calculateConnectionMask(level, worldPosition);
+        disabledMask = input.getIntOr("disabledMask", 0);
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    public void onNeighborChanged(Level level, BlockPos pos){
+        this.connectionMask = calculateConnectionMask(level, pos);
+        this.setChanged();
+        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
     }
 
     public UUID getMemberNetwork(){
@@ -89,32 +143,7 @@ public abstract class PipeEntity extends BlockEntity {
         return this.connectionMask;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    public List<Direction> getPipeConnections() {
+        return DirectionMask.getDirectionsFromMask(connectionMask);
+    }
 }

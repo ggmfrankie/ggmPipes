@@ -15,7 +15,9 @@ public class NetworkHandler {
     }
 
     public static void tickAllNetworks(){
-
+        for (var network : itemPipeNetworks.values()){
+            network.update();
+        }
     }
 
     public static void addToNetwork(UUID id, ItemPipeEntity entity){

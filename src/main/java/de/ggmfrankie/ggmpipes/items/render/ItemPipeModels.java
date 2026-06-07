@@ -19,13 +19,7 @@ import static net.neoforged.neoforgespi.ILaunchContext.LOGGER;
 public class ItemPipeModels {
 
     public enum PipeModel {
-        CENTER("block/pipe_center"),
-        NORTH_ARM("block/pipe_north"),
-        SOUTH_ARM("block/pipe_south"),
-        EAST_ARM("block/pipe_east"),
-        WEST_ARM("block/pipe_west"),
-        UP_ARM("block/pipe_up"),
-        DOWN_ARM("block/pipe_down");
+        CONNECTOR("block/pipe_connection");
 
         private final Identifier location;
         private final StandaloneModelKey<QuadCollection> key;

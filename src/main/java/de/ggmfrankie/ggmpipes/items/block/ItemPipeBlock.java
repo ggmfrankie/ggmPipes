@@ -22,7 +22,7 @@ public class ItemPipeBlock extends PipeBlock {
     @Override
     @NullMarked
     public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return false ? new ItemPipeEntity(blockPos, blockState) : null;
+        return blockState.getValue(HAS_MACHINE_CONNECTION) ? new ItemPipeEntity(blockPos, blockState) : null;
     }
 
     @Override
@@ -34,11 +34,6 @@ public class ItemPipeBlock extends PipeBlock {
 
     @Override
     protected boolean hasMachineConnection(Level level, BlockPos pos) {
-        return     CapabilityHelper.hasItemCapability(level, pos.north(), Direction.NORTH)
-                || CapabilityHelper.hasItemCapability(level, pos.south(), Direction.SOUTH)
-                || CapabilityHelper.hasItemCapability(level, pos.east(), Direction.EAST)
-                || CapabilityHelper.hasItemCapability(level, pos.west(), Direction.WEST)
-                || CapabilityHelper.hasItemCapability(level, pos.above(), Direction.UP)
-                || CapabilityHelper.hasItemCapability(level, pos.below(), Direction.DOWN);
+        return 0 != CapabilityHelper.getMachineConnections(level, pos, CapabilityHelper::hasItemCapability);
     }
 }

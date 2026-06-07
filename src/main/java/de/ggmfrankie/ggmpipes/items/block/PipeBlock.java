@@ -1,5 +1,7 @@
 package de.ggmfrankie.ggmpipes.items.block;
 
+import de.ggmfrankie.ggmpipes.items.tileentity.PipeEntity;
+import de.ggmfrankie.ggmpipes.utils.DirectionMask;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -19,6 +21,9 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock, EntityBlock {
@@ -62,12 +67,12 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
         VoxelShape[] shapes = new VoxelShape[64];
         for (int mask = 0; mask < 64; mask++){
             VoxelShape shape = SHAPE_CENTER;
-            if ((mask & (1)) != 0)  shape = Shapes.or(shape, SHAPE_NORTH);
-            if ((mask & (2)) != 0)  shape = Shapes.or(shape, SHAPE_SOUTH);
-            if ((mask & (4)) != 0)  shape = Shapes.or(shape, SHAPE_EAST);
-            if ((mask & (8)) != 0)  shape = Shapes.or(shape, SHAPE_WEST);
-            if ((mask & (16)) != 0) shape = Shapes.or(shape, SHAPE_UP);
-            if ((mask & (32)) != 0) shape = Shapes.or(shape, SHAPE_DOWN);
+            if ((mask & DirectionMask.NORTH) != 0) shape = Shapes.or(shape, SHAPE_NORTH);
+            if ((mask & DirectionMask.SOUTH) != 0) shape = Shapes.or(shape, SHAPE_SOUTH);
+            if ((mask & DirectionMask.EAST) != 0)  shape = Shapes.or(shape, SHAPE_EAST);
+            if ((mask & DirectionMask.WEST) != 0)  shape = Shapes.or(shape, SHAPE_WEST);
+            if ((mask & DirectionMask.UP) != 0)    shape = Shapes.or(shape, SHAPE_UP);
+            if ((mask & DirectionMask.DOWN) != 0)  shape = Shapes.or(shape, SHAPE_DOWN);
 
             shapes[mask] = shape.optimize();
         }
@@ -116,19 +121,19 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
                 .setValue(EAST,  canConnect(level, pos.east(),  Direction.EAST))
                 .setValue(WEST,  canConnect(level, pos.west(),  Direction.WEST))
                 .setValue(UP,    canConnect(level, pos.above(), Direction.UP))
-                .setValue(DOWN,  canConnect(level, pos.below(), Direction.DOWN));
+                .setValue(DOWN,  canConnect(level, pos.below(), Direction.DOWN))
+                .setValue(HAS_MACHINE_CONNECTION, hasMachineConnection(level, pos));
     }
 
-    public static Direction[] getPipeConnections(BlockState state){
-        var directions = new Direction[6];
-        int count = 0;
+    public static List<Direction> getPipeConnections(BlockState state){
+        List<Direction> directions = new ArrayList<>(6);
 
-        if (state.getValue(NORTH)) directions[count++] = Direction.NORTH;
-        if (state.getValue(SOUTH)) directions[count++] = Direction.SOUTH;
-        if (state.getValue(EAST))  directions[count++] = Direction.EAST;
-        if (state.getValue(WEST))  directions[count++] = Direction.WEST;
-        if (state.getValue(UP))    directions[count++] = Direction.UP;
-        if (state.getValue(DOWN))  directions[count]   = Direction.DOWN;
+        if (state.getValue(NORTH)) directions.add(Direction.NORTH);
+        if (state.getValue(SOUTH)) directions.add(Direction.SOUTH);
+        if (state.getValue(EAST))  directions.add(Direction.EAST);
+        if (state.getValue(WEST))  directions.add(Direction.WEST);
+        if (state.getValue(UP))    directions.add(Direction.UP);
+        if (state.getValue(DOWN))  directions.add(Direction.DOWN);
 
         return directions;
     }
@@ -143,13 +148,15 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
             @Nullable Orientation orientation,
             boolean movedByPiston
     ) {
-        if (!level.isClientSide()) {
-            BlockState newState = getState(level, pos);
+        if (level.isClientSide()) return;
 
-            if (!newState.equals(state)) {
-                level.setBlock(pos, newState, Block.UPDATE_ALL);
-            }
+        BlockState newState = getState(level, pos);
+
+        var entity = level.getBlockEntity(pos);
+        if (entity instanceof PipeEntity pipeEntity) {
+            pipeEntity.onNeighborChanged(level, pos);
         }
+        level.setBlock(pos, newState, Block.UPDATE_CLIENTS);
     }
 
     @Override
