@@ -113,15 +113,16 @@ public abstract class PipeEntity extends BlockEntity {
     @Override
     @NullMarked
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        return this.saveWithFullMetadata(registries);
+        return this.saveWithoutMetadata(registries);
     }
 
     @Override
     @NullMarked
     public void handleUpdateTag(ValueInput input) {
         super.handleUpdateTag(input);
-        connectionMask = calculateConnectionMask(level, worldPosition);
+        connectionMask = input.getIntOr("connectionMask", 0);
         disabledMask = input.getIntOr("disabledMask", 0);
+        System.out.println("Hello");
     }
 
     @Override
@@ -129,10 +130,18 @@ public abstract class PipeEntity extends BlockEntity {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    public void onNeighborChanged(Level level, BlockPos pos){
-        this.connectionMask = calculateConnectionMask(level, pos);
+    public void onNeighborChanged() {
+        this.connectionMask = calculateConnectionMask(level, worldPosition);
+        System.out.println("connectionMask: " + connectionMask);
         this.setChanged();
-        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+        if (level != null && !level.isClientSide()) {
+            level.sendBlockUpdated(
+                    worldPosition,
+                    getBlockState(),
+                    getBlockState(),
+                    Block.UPDATE_ALL
+            );
+        }
     }
 
     public UUID getMemberNetwork(){
@@ -140,7 +149,7 @@ public abstract class PipeEntity extends BlockEntity {
     }
 
     public int getMask(){
-        return this.connectionMask;
+        return this.connectionMask = calculateConnectionMask(level, worldPosition);
     }
 
     public List<Direction> getPipeConnections() {

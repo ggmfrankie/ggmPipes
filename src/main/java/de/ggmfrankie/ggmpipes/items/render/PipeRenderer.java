@@ -87,7 +87,7 @@ public abstract class PipeRenderer implements BlockEntityRenderer<PipeEntity, Pi
         List<BakedQuad> quads = model.getQuads(null);
         QuadInstance instance = new QuadInstance();
 
-        collector.submitCustomGeometry(stack, RenderTypes.cutoutMovingBlock(), (pose, vc) -> {
+        collector.submitCustomGeometry(stack, RenderTypes.solidMovingBlock(), (pose, vc) -> {
 
             instance.setColor(0xFFFFFFFF);
             instance.setLightCoords(combinedLight);
