@@ -16,32 +16,45 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemPipeNetwork extends PipeNetwork {
-    private List<ItemConnection> connections;
+    private List<ItemInputConnection> inputConnections;
+    private List<ItemOutputConnection> outputConnections;
 
     public ItemPipeNetwork(){
-        connections = new ArrayList<>(16);
+        inputConnections = new ArrayList<>(16);
+        outputConnections = new ArrayList<>(16);
     }
 
     public void update(){
-        for (var connection : connections){
+        for (var connection : outputConnections){
 
         }
     }
 
     @Override
     @NullMarked
-    public void addNode(PipeEntity entity) {
+    public void addAllNodes(PipeEntity entity) {
         if (!(entity.getLevel() instanceof ServerLevel serverLevel)) {
             return;
         }
+
         BlockPos pos = entity.getBlockPos();
-        for (var dir : entity.getPipeConnections()){
-            connections.add(
-                    new ItemConnection(
+        for (var dir : entity.getInputConnections()){
+            inputConnections.add(
+                    new ItemInputConnection(
                             serverLevel,
                             pos.relative(dir),
                             dir,
-                            ItemConnection.ItemConnectionMode.INSERT,
+                            pos
+                    )
+            );
+        }
+
+        for (var dir : entity.getOutputConnections()){
+            outputConnections.add(
+                    new ItemOutputConnection(
+                            serverLevel,
+                            pos.relative(dir),
+                            dir,
                             pos
                     )
             );
@@ -50,45 +63,36 @@ public class ItemPipeNetwork extends PipeNetwork {
 
     @Override
     @NullMarked
-    public void removeNode(PipeEntity entity) {
+    public void removeAllNodes(PipeEntity entity) {
         if (entity.getLevel() == null || entity.getLevel().isClientSide()) {
             return;
         }
         BlockPos pos = entity.getBlockPos();
-        connections.removeIf(connection -> connection.pipePos == pos);
+        inputConnections.removeIf(connection -> connection.getPipePos() == pos);
+        outputConnections.removeIf(connection -> connection.getPipePos() == pos);
     }
 
-    public static class ItemConnection {
-        public enum ItemConnectionMode {
-            INSERT,
-            EXTRACT,
-            ALL
-        }
+    public static abstract class ItemConnection {
+        @Nullable protected BasicItemFilter filter;
 
-        public int sleepTicks;
+        protected final Direction direction;
+        protected final BlockPos pipePos;
+        protected final BlockPos connectionPos;
+        protected final BlockCapabilityCache<ResourceHandler<ItemResource>, Direction> itemHandler;
 
-        private final Direction direction;
-
-        private ItemConnectionMode mode;
-
-        @Nullable private BasicItemFilter insertFilter;
-        @Nullable private BasicItemFilter extractFilter;
-
-        private final BlockPos pipePos;
-        private final BlockPos connectionPos;
-        private BlockCapabilityCache<ResourceHandler<ItemResource>, Direction> itemHandler;
-
-        public ItemConnection(ServerLevel level, BlockPos connection, Direction direction, ItemConnectionMode mode,BlockPos pipePos){
+        protected ItemConnection(ServerLevel level, BlockPos connection, Direction direction, BlockPos pipePos) {
             this.pipePos = pipePos;
             this.connectionPos = connection;
             this.itemHandler = BlockCapabilityCache.create(Capabilities.Item.BLOCK, level, connection, direction);
-            this.mode = mode;
             this.direction = direction;
-            this.sleepTicks = 0;
         }
 
-        public BlockPos getPos() {
+        public BlockPos getConnectionPos() {
             return connectionPos;
+        }
+
+        public BlockPos getPipePos() {
+            return pipePos;
         }
 
         public Direction getDirection() {
@@ -99,6 +103,23 @@ public class ItemPipeNetwork extends PipeNetwork {
         public ResourceHandler<ItemResource> getItemHandler() {
             return itemHandler.getCapability();
         }
+    }
 
+    public static class ItemInputConnection extends ItemConnection{
+        public ItemInputConnection(ServerLevel level, BlockPos connection, Direction direction, BlockPos pipePos){
+            super(level, connection, direction, pipePos);
+
+        }
+    }
+
+    public static class ItemOutputConnection extends ItemConnection{
+        public int sleepTicks;
+        public int extractionLimit;
+
+        public ItemOutputConnection(ServerLevel level, BlockPos connection, Direction direction, BlockPos pipePos){
+            super(level, connection, direction, pipePos);
+            this.sleepTicks = 0;
+            this.extractionLimit = 64;
+        }
     }
 }

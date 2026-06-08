@@ -28,11 +28,8 @@ import org.joml.Quaternionf;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 
-import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static de.ggmfrankie.ggmpipes.items.render.ItemPipeModels.PipeModel;
 
 @EventBusSubscriber(value = Dist.CLIENT)
 public abstract class PipeRenderer implements BlockEntityRenderer<PipeEntity, PipeRenderer.PipeRenderState> {
@@ -66,7 +63,7 @@ public abstract class PipeRenderer implements BlockEntityRenderer<PipeEntity, Pi
             ModelFeatureRenderer.CrumblingOverlay crumblingOverlay)
     {
         BlockEntityRenderer.super.extractRenderState(entity, state, partialTicks, pos, crumblingOverlay);
-        state.connectionMask = entity.getMask();
+        state.connectionMask = entity.getInputMask() | entity.getOutputMask();
     }
 
 

@@ -2,11 +2,9 @@ package de.ggmfrankie.ggmpipes.items.tileentity;
 
 import de.ggmfrankie.ggmpipes.items.block.PipeBlock;
 import de.ggmfrankie.ggmpipes.utils.DirectionMask;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -16,7 +14,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.NullMarked;
@@ -26,14 +23,15 @@ import java.util.*;
 
 public abstract class PipeEntity extends BlockEntity {
 
-    private int connectionMask;
-    private int disabledMask;
+    protected int disabledMask;
+
+    private int inputMask;
+    private int outputMask;
 
     protected UUID memberNetwork;
 
     public PipeEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        connectionMask = 0;
         disabledMask = 0;
         memberNetwork = null;
     }
@@ -42,7 +40,7 @@ public abstract class PipeEntity extends BlockEntity {
     public void onLoad() {
         super.onLoad();
 
-        this.connectionMask = calculateConnectionMask(level, worldPosition);
+        recalculateConnections();
         this.setChanged();
 
         if (level != null && !level.isClientSide()) {
@@ -97,6 +95,11 @@ public abstract class PipeEntity extends BlockEntity {
         return null;
     }
 
+    @Override
+    public void onChunkUnloaded() {
+        super.onChunkUnloaded();
+    }
+
     protected abstract int calculateConnectionMask(Level level, BlockPos pos);
 
     @Override
@@ -104,7 +107,8 @@ public abstract class PipeEntity extends BlockEntity {
     protected void loadAdditional(ValueInput valueInput){
         super.loadAdditional(valueInput);
 
-        connectionMask = valueInput.getIntOr("connectionMask", 0);
+        inputMask = valueInput.getIntOr("inputMask", 0);
+        outputMask = valueInput.getIntOr("outputMask", 0);
         disabledMask = valueInput.getIntOr("disabledMask", 0);
 
         //memberNetwork = valueInput.read("memberNetwork", UUIDUtil.CODEC).orElse(null);
@@ -115,7 +119,8 @@ public abstract class PipeEntity extends BlockEntity {
     protected void saveAdditional(ValueOutput valueOutput){
         super.saveAdditional(valueOutput);
 
-        valueOutput.putInt("connectionMask", connectionMask);
+        valueOutput.putInt("inputMask", inputMask);
+        valueOutput.putInt("outputMask", outputMask);
         valueOutput.putInt("disabledMask", disabledMask);
 
         //if (memberNetwork != null) valueOutput.store("memberNetwork", UUIDUtil.CODEC, memberNetwork);
@@ -134,7 +139,8 @@ public abstract class PipeEntity extends BlockEntity {
     @NullMarked
     public void handleUpdateTag(ValueInput input) {
         super.handleUpdateTag(input);
-        connectionMask = input.getIntOr("connectionMask", 0);
+        inputMask = input.getIntOr("inputMask", 0);
+        outputMask = input.getIntOr("outputMask", 0);
         disabledMask = input.getIntOr("disabledMask", 0);
     }
 
@@ -143,8 +149,9 @@ public abstract class PipeEntity extends BlockEntity {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    public BlockState onNeighborChanged(BlockState state) {
-        this.connectionMask = calculateConnectionMask(level, worldPosition);
+    public void onNeighborChanged() {
+        recalculateConnections();
+
         this.setChanged();
         if (level != null && !level.isClientSide()) {
 
@@ -155,22 +162,34 @@ public abstract class PipeEntity extends BlockEntity {
                     Block.UPDATE_ALL
             );
 
-            if (this.connectionMask == 0) {
-                return state.setValue(PipeBlock.HAS_MACHINE_CONNECTION, false);
-            }
         }
-        return state;
+
+    }
+
+    private void recalculateConnections(){
+        int newMask = calculateConnectionMask(level, worldPosition) & ~disabledMask;
+        this.inputMask &= newMask;
+        this.outputMask &= newMask;
+        this.inputMask |= newMask;
     }
 
     public UUID getMemberNetwork(){
         return this.memberNetwork;
     }
 
-    public int getMask(){
-        return this.connectionMask;// = calculateConnectionMask(level, worldPosition);
+    public int getInputMask(){
+        return this.inputMask;
     }
 
-    public List<Direction> getPipeConnections() {
-        return DirectionMask.getDirectionsFromMask(connectionMask);
+    public int getOutputMask(){
+        return this.outputMask;
+    }
+
+    public List<Direction> getInputConnections() {
+        return DirectionMask.getDirectionsFromMask(this.inputMask);
+    }
+
+    public List<Direction> getOutputConnections() {
+        return DirectionMask.getDirectionsFromMask(this.outputMask);
     }
 }

@@ -24,6 +24,6 @@ public class NetworkHandler {
         ItemPipeNetwork network = itemPipeNetworks.get(id);
         assert network != null;
 
-        network.addNode(entity);
+        network.addAllNodes(entity);
     }
 }

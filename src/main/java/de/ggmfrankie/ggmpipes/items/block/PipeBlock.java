@@ -167,7 +167,7 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
 
         var entity = level.getBlockEntity(pos);
         if (entity instanceof PipeEntity pipeEntity) {
-            newState = pipeEntity.onNeighborChanged(newState);
+            pipeEntity.onNeighborChanged();
         }
         level.setBlock(pos, newState, Block.UPDATE_CLIENTS);
     }
