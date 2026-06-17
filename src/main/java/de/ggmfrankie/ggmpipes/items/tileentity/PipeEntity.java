@@ -182,7 +182,7 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     @Override
     @NullMarked
     public Component getDisplayName() {
-        return null;
+        return Component.literal("Pipe");
     }
 
     @Override

@@ -1,5 +1,7 @@
 package de.ggmfrankie.ggmpipes.items.tileentity.filter;
 
-public abstract class Filter <F extends Filter<F, T>, T> {
+import net.minecraft.world.item.ItemStack;
 
+public interface Filter <F extends Filter<F, T>, T> {
+    boolean isValid(T obj);
 }

@@ -1,18 +1,37 @@
 package de.ggmfrankie.ggmpipes.items.tileentity;
 
 import de.ggmfrankie.ggmpipes.NetworkHandler;
+import de.ggmfrankie.ggmpipes.items.tileentity.filter.BasicItemFilter;
 import de.ggmfrankie.ggmpipes.registry.ModBlockEntities;
 import de.ggmfrankie.ggmpipes.utils.CapabilityHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStackResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import org.jspecify.annotations.NullMarked;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class ItemPipeEntity extends PipeEntity {
 
+
+    private final EnumMap<Direction, BasicItemFilter> insertFilters;
+    private final EnumMap<Direction, BasicItemFilter> extractFilters;
+
+
     public ItemPipeEntity(BlockPos worldPosition, BlockState blockState) {
         super(ModBlockEntities.ITEM_PIPE_ENTITY.get(), worldPosition, blockState);
+        this.insertFilters = new EnumMap<>(Direction.class);
+        this.extractFilters = new EnumMap<>(Direction.class);
+
+        //TODO init EnumMaps
+
     }
 
     @Override
@@ -34,4 +53,11 @@ public class ItemPipeEntity extends PipeEntity {
         return CapabilityHelper.getMachineConnections(level, pos, CapabilityHelper::hasItemCapability);
     }
 
+    public EnumMap<Direction, BasicItemFilter> getInsertFilters(){
+        return this.insertFilters;
+    }
+
+    public EnumMap<Direction, BasicItemFilter> getExtractFilters() {
+        return this.extractFilters;
+    }
 }

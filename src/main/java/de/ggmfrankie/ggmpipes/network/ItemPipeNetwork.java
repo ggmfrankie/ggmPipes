@@ -1,5 +1,6 @@
-package de.ggmfrankie.ggmpipes.items.tileentity.network;
+package de.ggmfrankie.ggmpipes.network;
 
+import de.ggmfrankie.ggmpipes.items.tileentity.ItemPipeEntity;
 import de.ggmfrankie.ggmpipes.items.tileentity.PipeEntity;
 import de.ggmfrankie.ggmpipes.items.tileentity.filter.BasicItemFilter;
 import net.minecraft.core.BlockPos;
@@ -15,7 +16,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ItemPipeNetwork extends PipeNetwork {
+public class ItemPipeNetwork extends PipeNetwork<ItemPipeEntity> {
     private List<ItemInputConnection> inputConnections;
     private List<ItemOutputConnection> outputConnections;
 
@@ -25,17 +26,20 @@ public class ItemPipeNetwork extends PipeNetwork {
     }
 
     public void update(){
-        for (var connection : outputConnections){
+        for (var extract : outputConnections) {
+            for (var insert : inputConnections) {
 
+            }
         }
     }
 
     @Override
     @NullMarked
-    public void addAllNodes(PipeEntity entity) {
+    public void addAllNodes(ItemPipeEntity entity) {
         if (!(entity.getLevel() instanceof ServerLevel serverLevel)) {
             return;
         }
+        this.removeAllNodes(entity);
 
         BlockPos pos = entity.getBlockPos();
         for (var dir : entity.getInputConnections()){
@@ -44,7 +48,8 @@ public class ItemPipeNetwork extends PipeNetwork {
                             serverLevel,
                             pos.relative(dir),
                             dir,
-                            pos
+                            pos,
+                            entity.getInsertFilters().get(dir).copy()
                     )
             );
         }
@@ -55,7 +60,8 @@ public class ItemPipeNetwork extends PipeNetwork {
                             serverLevel,
                             pos.relative(dir),
                             dir,
-                            pos
+                            pos,
+                            entity.getExtractFilters().get(dir).copy()
                     )
             );
         }
@@ -63,28 +69,29 @@ public class ItemPipeNetwork extends PipeNetwork {
 
     @Override
     @NullMarked
-    public void removeAllNodes(PipeEntity entity) {
+    public void removeAllNodes(ItemPipeEntity entity) {
         if (entity.getLevel() == null || entity.getLevel().isClientSide()) {
             return;
         }
         BlockPos pos = entity.getBlockPos();
-        inputConnections.removeIf(connection -> connection.getPipePos() == pos);
-        outputConnections.removeIf(connection -> connection.getPipePos() == pos);
+        inputConnections.removeIf(connection -> connection.getPipePos().equals(pos));
+        outputConnections.removeIf(connection -> connection.getPipePos().equals(pos));
     }
 
     public static abstract class ItemConnection {
-        @Nullable protected BasicItemFilter filter;
+        @Nullable protected final BasicItemFilter filter;
 
         protected final Direction direction;
         protected final BlockPos pipePos;
         protected final BlockPos connectionPos;
         protected final BlockCapabilityCache<ResourceHandler<ItemResource>, Direction> itemHandler;
 
-        protected ItemConnection(ServerLevel level, BlockPos connection, Direction direction, BlockPos pipePos) {
+        protected ItemConnection(ServerLevel level, BlockPos connection, Direction direction, BlockPos pipePos, BasicItemFilter filter) {
             this.pipePos = pipePos;
             this.connectionPos = connection;
             this.itemHandler = BlockCapabilityCache.create(Capabilities.Item.BLOCK, level, connection, direction);
             this.direction = direction;
+            this.filter = filter;
         }
 
         public BlockPos getConnectionPos() {
@@ -100,24 +107,29 @@ public class ItemPipeNetwork extends PipeNetwork {
         }
 
         @Nullable
+        public BasicItemFilter getFilter() {
+            return filter;
+        }
+
+        @Nullable
         public ResourceHandler<ItemResource> getItemHandler() {
             return itemHandler.getCapability();
         }
     }
 
-    public static class ItemInputConnection extends ItemConnection{
-        public ItemInputConnection(ServerLevel level, BlockPos connection, Direction direction, BlockPos pipePos){
-            super(level, connection, direction, pipePos);
+    public static class ItemInputConnection extends ItemConnection {
+        public ItemInputConnection(ServerLevel level, BlockPos connection, Direction direction, BlockPos pipePos, BasicItemFilter filter){
+            super(level, connection, direction, pipePos, filter);
 
         }
     }
 
-    public static class ItemOutputConnection extends ItemConnection{
+    public static class ItemOutputConnection extends ItemConnection {
         public int sleepTicks;
         public int extractionLimit;
 
-        public ItemOutputConnection(ServerLevel level, BlockPos connection, Direction direction, BlockPos pipePos){
-            super(level, connection, direction, pipePos);
+        public ItemOutputConnection(ServerLevel level, BlockPos connection, Direction direction, BlockPos pipePos, BasicItemFilter filter){
+            super(level, connection, direction, pipePos, filter);
             this.sleepTicks = 0;
             this.extractionLimit = 64;
         }

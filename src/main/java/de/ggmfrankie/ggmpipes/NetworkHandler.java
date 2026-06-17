@@ -1,7 +1,7 @@
 package de.ggmfrankie.ggmpipes;
 
 import de.ggmfrankie.ggmpipes.items.tileentity.ItemPipeEntity;
-import de.ggmfrankie.ggmpipes.items.tileentity.network.ItemPipeNetwork;
+import de.ggmfrankie.ggmpipes.network.ItemPipeNetwork;
 
 import java.util.*;
 
