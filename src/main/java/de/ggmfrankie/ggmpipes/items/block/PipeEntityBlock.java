@@ -28,17 +28,6 @@ public abstract class PipeEntityBlock extends PipeBlock implements EntityBlock {
         super(properties);
     }
 
-    @Override
-    @NullMarked
-    public abstract void neighborChanged(
-            BlockState state,
-            Level level,
-            BlockPos pos,
-            Block neighborBlock,
-            @Nullable Orientation orientation,
-            boolean movedByPiston
-    );
-
     private Direction getClickedArm(BlockState state, BlockHitResult hitResult) {
         Vec3 hitLoc = hitResult.getLocation();
 

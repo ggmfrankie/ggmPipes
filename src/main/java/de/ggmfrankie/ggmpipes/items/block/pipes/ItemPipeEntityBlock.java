@@ -25,15 +25,7 @@ public class ItemPipeEntityBlock extends PipeEntityBlock {
     }
 
     @Override
-    @NullMarked
-    public void neighborChanged(
-            BlockState state,
-            Level level,
-            BlockPos pos,
-            Block neighborBlock,
-            @Nullable Orientation orientation,
-            boolean movedByPiston
-    ) {
+    protected void update(Level level, BlockPos pos) {
         if (level.isClientSide()) return;
 
         boolean hasConnection = hasMachineConnection(level, pos);
@@ -42,6 +34,7 @@ public class ItemPipeEntityBlock extends PipeEntityBlock {
 
         if (entity instanceof PipeEntity pipeEntity) {
             if (hasConnection) {
+                BlockState state = level.getBlockState(pos);
                 BlockState newState = getPlacementState(level, pos);
                 pipeEntity.onNeighborChanged();
                 level.setBlock(pos, newState, Block.UPDATE_ALL);

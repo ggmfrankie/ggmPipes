@@ -13,12 +13,14 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import static de.ggmfrankie.ggmpipes.ggmPipes.MODID;
 import static de.ggmfrankie.ggmpipes.registry.ModBlocks.ITEM_PIPE_BLOCK;
+import static de.ggmfrankie.ggmpipes.registry.ModBlocks.ITEM_PIPE_ENTITY_BLOCK;
 
 public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     public static final DeferredItem<BlockItem> ITEM_PIPE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem(ITEM_PIPE_BLOCK);
+    public static final DeferredItem<BlockItem> ITEM_PIPE_ENTITY_BLOCK_ITEM = ITEMS.registerSimpleBlockItem(ITEM_PIPE_ENTITY_BLOCK);
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("ggmpipes_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.ggmpipes")) //The language key for the title of your CreativeModeTab

@@ -8,9 +8,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.redstone.Orientation;
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 public class ItemPipeBlock extends PipeBlock {
     public ItemPipeBlock(Properties properties) {
@@ -30,15 +27,7 @@ public class ItemPipeBlock extends PipeBlock {
     }
 
     @Override
-    @NullMarked
-    public void neighborChanged(
-            BlockState state,
-            Level level,
-            BlockPos pos,
-            Block neighborBlock,
-            @Nullable Orientation orientation,
-            boolean movedByPiston
-    ) {
+    protected void update(Level level, BlockPos pos){
         if (level.isClientSide()) return;
 
         boolean hasMachine = hasMachineConnection(level, pos);

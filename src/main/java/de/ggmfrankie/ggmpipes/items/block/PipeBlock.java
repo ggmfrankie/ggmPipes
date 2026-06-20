@@ -3,6 +3,7 @@ package de.ggmfrankie.ggmpipes.items.block;
 import de.ggmfrankie.ggmpipes.utils.DirectionMask;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -12,10 +13,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +93,11 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock 
     }
 
     @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return getPlacementState(context.getLevel(), context.getClickedPos());
+    }
+
+    @Override
     @NullMarked
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
         return SHAPES[calculateMask(state)];
@@ -107,6 +115,24 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock 
                 WATERLOGGED
         );
     }
+
+    @Override
+    @NullMarked
+    public void neighborChanged(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Block neighborBlock,
+            @Nullable Orientation orientation,
+            boolean movedByPiston
+    ) {
+        this.update(level, pos);
+    }
+
+    /**
+     * @apiNote this method is called on block placement and on neighbor changed
+     */
+    protected abstract void update(Level level, BlockPos pos);
 
     protected abstract boolean canConnect(Level level, BlockPos pos, Direction dir);
     protected abstract boolean hasMachineConnection(Level level, BlockPos pos);
@@ -132,5 +158,11 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock 
         if (state.getValue(DOWN))  directions.add(Direction.DOWN);
 
         return directions;
+    }
+
+    @Override
+    @NullMarked
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        this.update(level, pos);
     }
 }
