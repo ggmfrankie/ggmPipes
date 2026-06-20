@@ -1,0 +1,24 @@
+{
+  "multipart": [
+    {   "apply": { "model": "ggmpipes:block/pipe_center" }},
+
+    {   "when": { "north": "true" },
+      "apply": { "model": "ggmpipes:block/pipe_north", "uvlock": false }
+    },
+    {   "when": { "east": "true" },
+      "apply": { "model": "ggmpipes:block/pipe_east", "uvlock": false }
+    },
+    {   "when": { "south": "true" },
+      "apply": { "model": "ggmpipes:block/pipe_south", "uvlock": false }
+    },
+    {   "when": { "west": "true" },
+      "apply": { "model": "ggmpipes:block/pipe_west", "uvlock": false }
+    },
+    {   "when": { "up": "true" },
+      "apply": { "model": "ggmpipes:block/pipe_up", "uvlock": false }
+    },
+    {   "when": { "down": "true" },
+      "apply": { "model": "ggmpipes:block/pipe_down", "uvlock": false }
+    }
+  ]
+}

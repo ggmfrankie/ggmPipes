@@ -81,7 +81,6 @@ public abstract class PipeRenderer implements BlockEntityRenderer<PipeEntity, Pi
     private void renderConnection(QuadCollection model, Direction direction, PoseStack stack, SubmitNodeCollector collector, int combinedLight, int combinedOverlay){
         stack.pushPose();
 
-        // rotate around block center
         stack.translate(0.5D, 0.5D, 0.5D);
         stack.mulPose(getRotation(direction));
         stack.translate(-0.5D, -0.5D, -0.5D);

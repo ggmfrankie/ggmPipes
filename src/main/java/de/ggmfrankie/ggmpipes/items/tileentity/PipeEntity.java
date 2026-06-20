@@ -1,6 +1,6 @@
 package de.ggmfrankie.ggmpipes.items.tileentity;
 
-import de.ggmfrankie.ggmpipes.items.block.PipeBlock;
+import de.ggmfrankie.ggmpipes.items.block.PipeEntityBlock;
 import de.ggmfrankie.ggmpipes.utils.DirectionMask;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -84,7 +84,7 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
         while (!queue.isEmpty()){
             BlockPos curr = queue.remove();
             BlockState state = level.getBlockState(curr);
-            List<Direction> pipeConnections = PipeBlock.getPipeConnections(state);
+            List<Direction> pipeConnections = PipeEntityBlock.getPipeConnections(state);
 
             for (var dir : pipeConnections) {
                 BlockPos neighbor = curr.relative(dir);
@@ -97,7 +97,7 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
 
                 visited.add(neighbor);
 
-                if (level.getBlockState(neighbor).getBlock() instanceof PipeBlock) queue.add(neighbor);
+                if (level.getBlockState(neighbor).getBlock() instanceof PipeEntityBlock) queue.add(neighbor);
             }
         }
         return null;
@@ -159,19 +159,7 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
 
     public void onNeighborChanged() {
         recalculateConnections();
-
         this.setChanged();
-        if (level != null && !level.isClientSide()) {
-
-            level.sendBlockUpdated(
-                    worldPosition,
-                    getBlockState(),
-                    getBlockState(),
-                    Block.UPDATE_ALL
-            );
-
-        }
-
     }
 
     private void recalculateConnections(){

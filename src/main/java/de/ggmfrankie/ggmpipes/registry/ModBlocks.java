@@ -1,6 +1,7 @@
 package de.ggmfrankie.ggmpipes.registry;
 
-import de.ggmfrankie.ggmpipes.items.block.ItemPipeBlock;
+import de.ggmfrankie.ggmpipes.items.block.pipes.ItemPipeBlock;
+import de.ggmfrankie.ggmpipes.items.block.pipes.ItemPipeEntityBlock;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.SoundType;
@@ -13,6 +14,15 @@ import static de.ggmfrankie.ggmpipes.ggmPipes.MODID;
 
 public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
+
+    public static final DeferredBlock<ItemPipeEntityBlock> ITEM_PIPE_ENTITY_BLOCK = BLOCKS.register(
+            "item_pipe_entity_block",
+            registryName -> new ItemPipeEntityBlock(BlockBehaviour.Properties.of()
+                    .setId(ResourceKey.create(Registries.BLOCK, registryName))
+                    .destroyTime(2.0f)
+                    .explosionResistance(10.0f)
+                    .sound(SoundType.METAL)
+            ));
 
     public static final DeferredBlock<ItemPipeBlock> ITEM_PIPE_BLOCK = BLOCKS.register(
             "item_pipe_block",

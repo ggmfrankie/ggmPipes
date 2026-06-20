@@ -14,16 +14,23 @@ public class NetworkHandler {
         return id;
     }
 
-    public static void tickAllNetworks(){
-        for (var network : itemPipeNetworks.values()){
+    public static void tickAllNetworks() {
+        for (var network : itemPipeNetworks.values()) {
             network.update();
         }
     }
 
-    public static void addToNetwork(UUID id, ItemPipeEntity entity){
+    public static void addToNetwork(UUID id, ItemPipeEntity entity) {
         ItemPipeNetwork network = itemPipeNetworks.get(id);
         assert network != null;
 
         network.addAllNodes(entity);
+    }
+
+    public static void removeFromNetwork(UUID id, ItemPipeEntity entity) {
+        ItemPipeNetwork network = itemPipeNetworks.get(id);
+        assert network != null;
+
+        network.removeAllNodes(entity);
     }
 }

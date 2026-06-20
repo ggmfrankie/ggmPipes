@@ -49,6 +49,12 @@ public class ItemPipeEntity extends PipeEntity {
     }
 
     @Override
+    @NullMarked
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        if (memberNetwork != null) NetworkHandler.removeFromNetwork(memberNetwork, this);
+    }
+
+    @Override
     protected UUID getOrCreateNetwork(Level level, BlockPos start){
         UUID id = super.getOrCreateNetwork(level, start);
 

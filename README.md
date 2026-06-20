@@ -13,11 +13,14 @@ Documentation: https://docs.neoforged.net/docs
 - [ ] TileEntity
   - [x] creation on machine placement
   - [x] creation on pipe next to machine placement
+  - [ ] make block entity respect disabled sides
   - [ ] proper deletion of the existing tile entity
   - [ ] proper serialization of filters
   - [ ] sign out of network on unload/deletion
   - [ ] GUI fix filter slots
   - [ ] GUI add extract/insert button
   - [ ] GUI sync with network
+- [ ] Block
+  - [ ] Make block respect disabled sides
 
     

@@ -1,57 +1,35 @@
 package de.ggmfrankie.ggmpipes.items.block;
 
-import com.mojang.serialization.MapCodec;
-import de.ggmfrankie.ggmpipes.ggmPipes;
-import de.ggmfrankie.ggmpipes.items.tileentity.PipeEntity;
 import de.ggmfrankie.ggmpipes.utils.DirectionMask;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.SimpleMenuProvider;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.redstone.Orientation;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
+public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock {
 
-public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock, EntityBlock {
+    protected static final BooleanProperty DOWN = BooleanProperty.create("down");
+    protected static final BooleanProperty UP = BooleanProperty.create("up");
+    protected static final BooleanProperty NORTH = BooleanProperty.create("north");
+    protected static final BooleanProperty SOUTH = BooleanProperty.create("south");
+    protected static final BooleanProperty WEST = BooleanProperty.create("west");
+    protected static final BooleanProperty EAST = BooleanProperty.create("east");
+    protected static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
-
-
-    public static final BooleanProperty DOWN = BooleanProperty.create("down");
-    public static final BooleanProperty UP = BooleanProperty.create("up");
-    public static final BooleanProperty NORTH = BooleanProperty.create("north");
-    public static final BooleanProperty SOUTH = BooleanProperty.create("south");
-    public static final BooleanProperty WEST = BooleanProperty.create("west");
-    public static final BooleanProperty EAST = BooleanProperty.create("east");
-    public static final BooleanProperty HAS_MACHINE_CONNECTION = BooleanProperty.create("has_machine_connection");
-    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     public PipeBlock(Properties properties) {
         super(properties);
@@ -63,23 +41,21 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
                 .setValue(SOUTH, false)
                 .setValue(EAST, false)
                 .setValue(WEST, false)
-                .setValue(HAS_MACHINE_CONNECTION, false)
                 .setValue(WATERLOGGED, false)
         );
     }
 
-    // 0, 0, 0 bottom-north-west -> 16, 16, 16 top-south-east
-    public static final VoxelShape SHAPE_CENTER = Block.box(5.5, 5.5, 5.5, 10.5, 10.5, 10.5);
-    public static final VoxelShape SHAPE_NORTH = Block.box(5.5, 5.5, 0, 10.5, 10.5, 5.5);
-    public static final VoxelShape SHAPE_SOUTH = Block.box(5.5, 5.5, 10.5, 10.5, 10.5, 16);
-    public static final VoxelShape SHAPE_WEST = Block.box(0, 5.5, 5.5, 5.5, 10.5, 10.5);
-    public static final VoxelShape SHAPE_EAST = Block.box(10.5, 5.5, 5.5, 16, 10.5, 10.5);
-    public static final VoxelShape SHAPE_DOWN = Block.box(5.5, 0, 5.5, 10.5, 5.5, 10.5);
-    public static final VoxelShape SHAPE_UP = Block.box(5.5, 10.5, 5.5, 10.5, 16, 10.5);
+    protected static final VoxelShape SHAPE_CENTER = Block.box(5.5, 5.5, 5.5, 10.5, 10.5, 10.5);
+    protected static final VoxelShape SHAPE_NORTH = Block.box(5.5, 5.5, 0, 10.5, 10.5, 5.5);
+    protected static final VoxelShape SHAPE_SOUTH = Block.box(5.5, 5.5, 10.5, 10.5, 10.5, 16);
+    protected static final VoxelShape SHAPE_WEST = Block.box(0, 5.5, 5.5, 5.5, 10.5, 10.5);
+    protected static final VoxelShape SHAPE_EAST = Block.box(10.5, 5.5, 5.5, 16, 10.5, 10.5);
+    protected static final VoxelShape SHAPE_DOWN = Block.box(5.5, 0, 5.5, 10.5, 5.5, 10.5);
+    protected static final VoxelShape SHAPE_UP = Block.box(5.5, 10.5, 5.5, 10.5, 16, 10.5);
 
-    private static final VoxelShape[] SHAPES = makeShapes();
+    protected static final VoxelShape[] SHAPES = makeShapes();
 
-    private static VoxelShape[] makeShapes(){
+    private static VoxelShape[] makeShapes() {
         VoxelShape[] shapes = new VoxelShape[64];
         for (int mask = 0; mask < 64; mask++){
             VoxelShape shape = SHAPE_CENTER;
@@ -95,7 +71,7 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
         return shapes;
     }
 
-    public static int calculateMask(BlockState state){
+    public static int calculateMask(BlockState state) {
         int mask = 0;
         if (state.getValue(NORTH)) mask |= 1;
         if (state.getValue(SOUTH)) mask |= 2;
@@ -128,7 +104,6 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
                 SOUTH,
                 WEST,
                 EAST,
-                HAS_MACHINE_CONNECTION,
                 WATERLOGGED
         );
     }
@@ -136,18 +111,17 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
     protected abstract boolean canConnect(Level level, BlockPos pos, Direction dir);
     protected abstract boolean hasMachineConnection(Level level, BlockPos pos);
 
-    private BlockState getState(Level level, BlockPos pos){
+    public BlockState getPlacementState(Level level, BlockPos pos) {
         return this.defaultBlockState()
                 .setValue(NORTH, canConnect(level, pos.north(), Direction.NORTH))
                 .setValue(SOUTH, canConnect(level, pos.south(), Direction.SOUTH))
                 .setValue(EAST,  canConnect(level, pos.east(),  Direction.EAST))
                 .setValue(WEST,  canConnect(level, pos.west(),  Direction.WEST))
                 .setValue(UP,    canConnect(level, pos.above(), Direction.UP))
-                .setValue(DOWN,  canConnect(level, pos.below(), Direction.DOWN))
-                .setValue(HAS_MACHINE_CONNECTION, hasMachineConnection(level, pos));
+                .setValue(DOWN,  canConnect(level, pos.below(), Direction.DOWN));
     }
 
-    public static List<Direction> getPipeConnections(BlockState state){
+    public static List<Direction> getPipeConnections(BlockState state) {
         List<Direction> directions = new ArrayList<>(6);
 
         if (state.getValue(NORTH)) directions.add(Direction.NORTH);
@@ -159,93 +133,4 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock,
 
         return directions;
     }
-
-    @Override
-    @NullMarked
-    public void neighborChanged(
-            BlockState state,
-            Level level,
-            BlockPos pos,
-            Block neighborBlock,
-            @Nullable Orientation orientation,
-            boolean movedByPiston
-    ) {
-        if (level.isClientSide()) return;
-
-        BlockState newState = getState(level, pos);
-
-        var entity = level.getBlockEntity(pos);
-        if (entity instanceof PipeEntity pipeEntity) {
-            pipeEntity.onNeighborChanged();
-        }
-        level.setBlock(pos, newState, Block.UPDATE_CLIENTS);
-    }
-
-    private Direction getClickedArm(BlockState state, BlockHitResult hitResult) {
-        Vec3 hitLoc = hitResult.getLocation();
-
-        double x = (hitLoc.x - Math.floor(hitLoc.x)) * 16;
-        double y = (hitLoc.y - Math.floor(hitLoc.y)) * 16;
-        double z = (hitLoc.z - Math.floor(hitLoc.z)) * 16;
-
-        boolean inCenterX = x >= 5.5 && x <= 10.5;
-        boolean inCenterY = y >= 5.5 && y <= 10.5;
-        boolean inCenterZ = z >= 5.5 && z <= 10.5;
-
-        if (inCenterX && inCenterY && inCenterZ) {
-            return null;
-        }
-
-        if (z < 5.5 && inCenterX && inCenterY && state.getValue(NORTH))  return Direction.NORTH;
-        if (z > 10.5 && inCenterX && inCenterY && state.getValue(SOUTH)) return Direction.SOUTH;
-        if (x < 5.5 && inCenterY && inCenterZ && state.getValue(WEST))   return Direction.WEST;
-        if (x > 10.5 && inCenterY && inCenterZ && state.getValue(EAST))  return Direction.EAST;
-        if (y < 5.5 && inCenterX && inCenterZ && state.getValue(DOWN))   return Direction.DOWN;
-        if (y > 10.5 && inCenterX && inCenterZ && state.getValue(UP))    return Direction.UP;
-
-        return null;
-    }
-
-    @Override
-    @NullMarked
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (level.isClientSide()) return InteractionResult.SUCCESS;
-
-        if (level.getBlockEntity(pos) instanceof PipeEntity pipeEntity) {
-            Direction clickedSide = getClickedArm(state, hitResult);
-            if (clickedSide == null) return InteractionResult.PASS;
-
-            pipeEntity.setClickedDirection(clickedSide);
-            ((ServerPlayer) player).openMenu(pipeEntity,
-            buf -> {
-                    buf.writeBlockPos(pos);
-                    buf.writeByte(clickedSide.get3DDataValue());
-                }
-            );
-        }
-
-        return InteractionResult.SUCCESS;
-    }
-
-    @Override
-    @NullMarked
-    protected InteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        return useWithoutItem(state, level, pos, player, hitResult);
-    }
-
-    @Override
-    @NullMarked
-    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, ItemStack toolStack, boolean willHarvest, FluidState fluid) {
-        return super.onDestroyedByPlayer(state, level, pos, player, toolStack, willHarvest, fluid);
-    }
-
-    @Override
-    @NullMarked
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return getState(context.getLevel(), context.getClickedPos());
-    }
-
-    @Override
-    @NullMarked
-    public abstract @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState);
 }
