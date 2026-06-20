@@ -53,19 +53,6 @@ public class ItemPipeBlock extends PipeBlock {
 
     @Override
     @NullMarked
-    protected InteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if(level.isClientSide()) return InteractionResult.SUCCESS;
-
-        BlockEntity entity = level.getBlockEntity(pos);
-        if(entity instanceof PipeEntity pipeEntity){
-            player.openMenu( new SimpleMenuProvider(pipeEntity, Component.literal("Item Pipe")), pos);
-        }
-
-        return InteractionResult.SUCCESS;
-    }
-
-    @Override
-    @NullMarked
     protected MapCodec<? extends Block> codec() {
         return CODEC;
     }

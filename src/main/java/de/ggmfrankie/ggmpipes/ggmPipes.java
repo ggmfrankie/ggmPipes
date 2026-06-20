@@ -3,6 +3,7 @@ package de.ggmfrankie.ggmpipes;
 import de.ggmfrankie.ggmpipes.registry.ModBlockEntities;
 import de.ggmfrankie.ggmpipes.registry.ModBlocks;
 import de.ggmfrankie.ggmpipes.registry.ModItems;
+import de.ggmfrankie.ggmpipes.registry.ModMenuTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -38,6 +39,7 @@ public class ggmPipes {
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModItems.register(modEventBus);
+        ModMenuTypes.register(modEventBus);
 
 
         // Register ourselves for server and other game events we are interested in.

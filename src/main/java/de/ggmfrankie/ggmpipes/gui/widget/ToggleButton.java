@@ -17,7 +17,7 @@ public class ToggleButton extends AbstractButton {
     private final ToggleAction action;
     private final Font font;
 
-    protected ToggleButton(int x, int y, int width, int height, boolean initial, ToggleAction action, Font font) {
+    public ToggleButton(int x, int y, int width, int height, boolean initial, ToggleAction action, Font font) {
         super(x, y, width, height, Component.empty());
         state = initial;
         this.action = action;

@@ -1,11 +1,15 @@
 package de.ggmfrankie.ggmpipes.items.tileentity;
 
 import de.ggmfrankie.ggmpipes.NetworkHandler;
+import de.ggmfrankie.ggmpipes.gui.ItemPipeGUIMenu;
 import de.ggmfrankie.ggmpipes.items.tileentity.filter.BasicItemFilter;
 import de.ggmfrankie.ggmpipes.registry.ModBlockEntities;
 import de.ggmfrankie.ggmpipes.utils.CapabilityHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,6 +17,7 @@ import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.item.ItemStackResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -30,8 +35,10 @@ public class ItemPipeEntity extends PipeEntity {
         this.insertFilters = new EnumMap<>(Direction.class);
         this.extractFilters = new EnumMap<>(Direction.class);
 
-        //TODO init EnumMaps
-
+        for (var dir : Direction.values()) {
+            insertFilters.put(dir, new BasicItemFilter(this));
+            extractFilters.put(dir, new BasicItemFilter(this));
+        }
     }
 
     @Override
@@ -51,6 +58,12 @@ public class ItemPipeEntity extends PipeEntity {
     @Override
     protected int calculateConnectionMask(Level level, BlockPos pos) {
         return CapabilityHelper.getMachineConnections(level, pos, CapabilityHelper::hasItemCapability);
+    }
+
+    @Override
+    @NullMarked
+    public @Nullable AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
+        return new ItemPipeGUIMenu(i, inventory, this, getClickedDirection());
     }
 
     public EnumMap<Direction, BasicItemFilter> getInsertFilters(){

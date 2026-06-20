@@ -27,10 +27,12 @@ public class ScreenBase<T extends AbstractContainerMenu> extends AbstractContain
 
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        int x = (width - imageWidth) / 2;
+        int y = (height - imageHeight) / 2;
         graphics.blit(RenderPipelines.GUI_TEXTURED,
                 texture,
-                mouseX,
-                mouseY,
+                x,
+                y,
                 0,
                 0,
                 imageWidth,
@@ -41,6 +43,7 @@ public class ScreenBase<T extends AbstractContainerMenu> extends AbstractContain
     }
 
     @Override
+    @NullMarked
     protected void extractLabels(GuiGraphicsExtractor graphics, int xm, int ym) {
 
     }

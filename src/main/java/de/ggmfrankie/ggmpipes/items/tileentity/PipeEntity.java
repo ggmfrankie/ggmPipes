@@ -34,6 +34,8 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     private int inputMask;
     private int outputMask;
 
+    private Direction clickedDirection;
+
     protected UUID memberNetwork;
 
     public PipeEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -209,5 +211,13 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
 
     public List<Direction> getOutputConnections() {
         return DirectionMask.getDirectionsFromMask(this.outputMask);
+    }
+
+    public void setClickedDirection(Direction dir) {
+        this.clickedDirection = dir;
+    }
+
+    public Direction getClickedDirection() {
+        return this.clickedDirection;
     }
 }

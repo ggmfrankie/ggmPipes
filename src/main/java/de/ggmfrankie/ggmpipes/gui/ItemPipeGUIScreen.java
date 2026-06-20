@@ -38,8 +38,8 @@ public class ItemPipeGUIScreen extends ScreenBase<ItemPipeGUIMenu> {
     @Override
     protected void init() {
         super.init();
-        this.toggleInsertButton = new ToggleButton(leftPos + 100, topPos + 20, 50, 20,
-                menu.blockEntity.
-        );
+//        this.toggleInsertButton = new ToggleButton(leftPos + 100, topPos + 20, 50, 20, true,
+//                (boolean state, ToggleButton button) -> {return;}
+//        );
     }
 }
