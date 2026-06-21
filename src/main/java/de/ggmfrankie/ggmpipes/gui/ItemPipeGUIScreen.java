@@ -2,8 +2,10 @@ package de.ggmfrankie.ggmpipes.gui;
 
 import de.ggmfrankie.ggmpipes.ggmPipes;
 import de.ggmfrankie.ggmpipes.gui.widget.ToggleButton;
+import de.ggmfrankie.ggmpipes.items.tileentity.ItemPipeEntity;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
@@ -20,8 +22,8 @@ public class ItemPipeGUIScreen extends ScreenBase<ItemPipeGUIMenu> {
     private ToggleButton toggleInsertButton;
     private ToggleButton toggleExtractButton;
 
-    public ItemPipeGUIScreen(ItemPipeGUIMenu container, Inventory inventory, Component title) {
-        super(BACKGROUND_TEXTURE, container, inventory, title, 176, 166);
+    public ItemPipeGUIScreen(ItemPipeGUIMenu menu, Inventory inventory, Component title) {
+        super(BACKGROUND_TEXTURE, menu, inventory, title, 176, 166);
     }
 
     @Override
@@ -38,8 +40,21 @@ public class ItemPipeGUIScreen extends ScreenBase<ItemPipeGUIMenu> {
     @Override
     protected void init() {
         super.init();
-//        this.toggleInsertButton = new ToggleButton(leftPos + 100, topPos + 20, 50, 20, true,
-//                (boolean state, ToggleButton button) -> {return;}
-//        );
+        this.toggleInsertButton = new ToggleButton(leftPos + 80, topPos + 20, 15, 20, false,
+                (boolean state, ToggleButton button) -> {
+                    Direction dir = menu.getClickedDirection();
+                    menu.getBlockEntity().setInsert(dir, state);
+                },
+                this.getFont()
+        );
+        this.toggleExtractButton = new ToggleButton(leftPos + 80, topPos + 40, 15, 20, false,
+                (boolean state, ToggleButton button) -> {
+                    Direction dir = menu.getClickedDirection();
+                    menu.getBlockEntity().setExtract(dir, state);
+                },
+                this.getFont()
+        );
+        addRenderableWidget(toggleInsertButton);
+        addRenderableWidget(toggleExtractButton);
     }
 }

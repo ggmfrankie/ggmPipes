@@ -17,7 +17,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jspecify.annotations.NullMarked;
 
 public class ItemPipeGUIMenu extends AbstractContainerMenu {
-    public final PipeEntity blockEntity;
+    private final ItemPipeEntity blockEntity;
+    private final Direction clickedDirection;
     private final Level level;
 
     public ItemPipeGUIMenu(int containerId, Inventory inv, FriendlyByteBuf extraData) {
@@ -28,14 +29,15 @@ public class ItemPipeGUIMenu extends AbstractContainerMenu {
         super(ModMenuTypes.ITEM_PIPE_MENU.get(), containerId);
         this.blockEntity = ((ItemPipeEntity) blockEntity);
         this.level = inv.player.level();
+        this.clickedDirection = direction;
 
         addPlayerInventory(inv);
         addPlayerHotbar(inv);
 
-        BasicItemFilter insertFilter = ((ItemPipeEntity) blockEntity).getInsertFilters().get(direction);
-        BasicItemFilter extractFilter = ((ItemPipeEntity) blockEntity).getExtractFilters().get(direction);
+        BasicItemFilter insertFilter  = this.blockEntity.getInsertFilters().get(direction);
+        BasicItemFilter extractFilter = this.blockEntity.getExtractFilters().get(direction);
 
-        assert insertFilter != null;
+        assert insertFilter  != null;
         assert extractFilter != null;
 
         addFilter(insertFilter, 0);
@@ -75,5 +77,13 @@ public class ItemPipeGUIMenu extends AbstractContainerMenu {
                 this.addSlot(new GhostSlot(filterInv, j + i * 4, 8 + j * 18 + offset, 18 + i * 18));
             }
         }
+    }
+
+    public Direction getClickedDirection() {
+        return clickedDirection;
+    }
+
+    public ItemPipeEntity getBlockEntity(){
+        return blockEntity;
     }
 }

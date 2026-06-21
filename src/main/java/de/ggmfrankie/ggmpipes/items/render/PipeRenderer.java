@@ -63,7 +63,7 @@ public abstract class PipeRenderer implements BlockEntityRenderer<PipeEntity, Pi
             ModelFeatureRenderer.CrumblingOverlay crumblingOverlay)
     {
         BlockEntityRenderer.super.extractRenderState(entity, state, partialTicks, pos, crumblingOverlay);
-        state.connectionMask = entity.getInputMask() | entity.getOutputMask();
+        state.connectionMask = entity.getExtractMask() | entity.getInsertMask();
     }
 
 

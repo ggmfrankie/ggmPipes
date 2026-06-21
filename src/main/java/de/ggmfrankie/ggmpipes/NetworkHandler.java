@@ -2,9 +2,15 @@ package de.ggmfrankie.ggmpipes;
 
 import de.ggmfrankie.ggmpipes.items.tileentity.ItemPipeEntity;
 import de.ggmfrankie.ggmpipes.network.ItemPipeNetwork;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.*;
 
+@EventBusSubscriber(value = Dist.DEDICATED_SERVER)
 public class NetworkHandler {
     private static final Map<UUID, ItemPipeNetwork> itemPipeNetworks = new HashMap<>();
 
@@ -12,12 +18,6 @@ public class NetworkHandler {
         UUID id = UUID.randomUUID();
         itemPipeNetworks.put(id, new ItemPipeNetwork());
         return id;
-    }
-
-    public static void tickAllNetworks() {
-        for (var network : itemPipeNetworks.values()) {
-            network.update();
-        }
     }
 
     public static void addToNetwork(UUID id, ItemPipeEntity entity) {
@@ -32,5 +32,17 @@ public class NetworkHandler {
         assert network != null;
 
         network.removeAllNodes(entity);
+    }
+
+    @SubscribeEvent
+    public static void onServerTick(ServerTickEvent.Post event) {
+        for (var network : itemPipeNetworks.values()) {
+            network.update();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onServerStop(ServerStoppingEvent event) {
+        //TODO
     }
 }

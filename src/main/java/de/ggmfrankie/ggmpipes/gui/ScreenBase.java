@@ -43,6 +43,11 @@ public class ScreenBase<T extends AbstractContainerMenu> extends AbstractContain
     }
 
     @Override
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractContents(graphics, mouseX, mouseY, a);
+    }
+
+    @Override
     @NullMarked
     protected void extractLabels(GuiGraphicsExtractor graphics, int xm, int ym) {
 

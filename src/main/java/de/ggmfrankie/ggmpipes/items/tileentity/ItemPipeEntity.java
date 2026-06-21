@@ -62,8 +62,21 @@ public class ItemPipeEntity extends PipeEntity {
     }
 
     @Override
+    public void onChunkUnloaded() {
+        if (memberNetwork != null) NetworkHandler.removeFromNetwork(memberNetwork, this);
+    }
+
+    @Override
     protected int calculateConnectionMask(Level level, BlockPos pos) {
         return CapabilityHelper.getMachineConnections(level, pos, CapabilityHelper::hasItemCapability);
+    }
+
+    @Override
+    public void updateConnectionsInNetwork() {
+        if (memberNetwork != null){
+            NetworkHandler.removeFromNetwork(memberNetwork, this);
+            NetworkHandler.addToNetwork(memberNetwork, this);
+        }
     }
 
     @Override

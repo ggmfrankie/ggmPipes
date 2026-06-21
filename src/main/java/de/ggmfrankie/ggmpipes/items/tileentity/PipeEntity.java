@@ -31,8 +31,8 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
 
     protected int disabledMask;
 
-    private int inputMask;
-    private int outputMask;
+    private int extractMask;
+    private int insertMask;
 
     private Direction clickedDirection;
 
@@ -104,22 +104,20 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     }
 
     @Override
-    public void onChunkUnloaded() {
-        super.onChunkUnloaded();
-    }
+    public abstract void onChunkUnloaded();
 
     protected abstract int calculateConnectionMask(Level level, BlockPos pos);
+
+    public abstract void updateConnectionsInNetwork();
 
     @Override
     @NullMarked
     protected void loadAdditional(ValueInput valueInput){
         super.loadAdditional(valueInput);
 
-        inputMask = valueInput.getIntOr("inputMask", 0);
-        outputMask = valueInput.getIntOr("outputMask", 0);
+        extractMask = valueInput.getIntOr("extractMask", 0);
+        insertMask = valueInput.getIntOr("insertMask", 0);
         disabledMask = valueInput.getIntOr("disabledMask", 0);
-
-        //memberNetwork = valueInput.read("memberNetwork", UUIDUtil.CODEC).orElse(null);
     }
 
     @Override
@@ -127,11 +125,9 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     protected void saveAdditional(ValueOutput valueOutput){
         super.saveAdditional(valueOutput);
 
-        valueOutput.putInt("inputMask", inputMask);
-        valueOutput.putInt("outputMask", outputMask);
+        valueOutput.putInt("extractMask", extractMask);
+        valueOutput.putInt("insertMask", insertMask);
         valueOutput.putInt("disabledMask", disabledMask);
-
-        //if (memberNetwork != null) valueOutput.store("memberNetwork", UUIDUtil.CODEC, memberNetwork);
     }
 
     @Override
@@ -147,8 +143,8 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     @NullMarked
     public void handleUpdateTag(ValueInput input) {
         super.handleUpdateTag(input);
-        inputMask = input.getIntOr("inputMask", 0);
-        outputMask = input.getIntOr("outputMask", 0);
+        extractMask = input.getIntOr("extractMask", 0);
+        insertMask = input.getIntOr("insertMask", 0);
         disabledMask = input.getIntOr("disabledMask", 0);
     }
 
@@ -164,10 +160,33 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
 
     private void recalculateConnections(){
         int newMask = calculateConnectionMask(level, worldPosition) & ~disabledMask;
-        this.inputMask &= newMask;
-        this.outputMask &= newMask;
-        this.inputMask |= newMask;
+        this.extractMask &= newMask;
+        this.insertMask &= newMask;
+        this.extractMask |= newMask;
     }
+
+    public void setInsert(Direction dir, boolean set){
+        int mask = DirectionMask.getMaskFromDirection(dir);
+        if (set){
+            this.insertMask |= mask;
+        } else {
+            this.insertMask &= ~mask;
+        }
+        updateConnectionsInNetwork();
+        this.setChanged();
+    }
+
+    public void setExtract(Direction dir, boolean set){
+        int mask = DirectionMask.getMaskFromDirection(dir);
+        if (set){
+            this.extractMask |= mask;
+        } else {
+            this.extractMask &= ~mask;
+        }
+        updateConnectionsInNetwork();
+        this.setChanged();
+    }
+
 
     @Override
     @NullMarked
@@ -185,20 +204,20 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
         return this.memberNetwork;
     }
 
-    public int getInputMask(){
-        return this.inputMask;
+    public int getExtractMask(){
+        return this.extractMask;
     }
 
-    public int getOutputMask(){
-        return this.outputMask;
+    public int getInsertMask(){
+        return this.insertMask;
     }
 
     public List<Direction> getInputConnections() {
-        return DirectionMask.getDirectionsFromMask(this.inputMask);
+        return DirectionMask.getDirectionsFromMask(this.extractMask);
     }
 
     public List<Direction> getOutputConnections() {
-        return DirectionMask.getDirectionsFromMask(this.outputMask);
+        return DirectionMask.getDirectionsFromMask(this.insertMask);
     }
 
     public void setClickedDirection(Direction dir) {

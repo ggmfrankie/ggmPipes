@@ -10,12 +10,12 @@ public class DirectionMask {
     public static final int SOUTH = 2;
 
     public static final int EAST  = 4;
-    public static final int WEST = 8;
+    public static final int WEST  = 8;
 
     public static final int UP    = 16;
     public static final int DOWN  = 32;
 
-    public static final int ALL = NORTH|SOUTH|EAST| WEST |UP|DOWN;
+    public static final int ALL = NORTH|SOUTH|EAST|WEST|UP|DOWN;
 
     public static List<Direction> getDirectionsFromMask(int mask){
         List<Direction> directions = new ArrayList<>();
@@ -28,5 +28,16 @@ public class DirectionMask {
         if ((mask & DirectionMask.DOWN) != 0)  directions.add(Direction.DOWN);
 
         return directions;
+    }
+
+    public static int getMaskFromDirection(Direction direction){
+        return switch (direction) {
+            case NORTH -> DirectionMask.NORTH;
+            case SOUTH -> DirectionMask.SOUTH;
+            case EAST  -> DirectionMask.EAST;
+            case WEST  -> DirectionMask.WEST;
+            case UP    -> DirectionMask.UP;
+            case DOWN  -> DirectionMask.DOWN;
+        };
     }
 }

@@ -31,8 +31,8 @@ public class ToggleButton extends AbstractButton {
         this.extractDefaultSprite(guiGraphicsExtractor);
         int textColor = 0xFFFFFF;
         if (!this.active) textColor = 0xA0A0A0;
-        guiGraphicsExtractor.text(font, this.getMessage(),
-                this.getX() + (this.width - this.font.width(this.getMessage())) / 2,
+        guiGraphicsExtractor.text(font, "this.getMessage()",
+                this.getX() + (this.width - this.font.width("this.getMessage()")) / 2,
                 this.getY() + (this.height - 8) / 2,
                 textColor
         );
@@ -48,6 +48,7 @@ public class ToggleButton extends AbstractButton {
     }
 
     @Override
+    @NullMarked
     public void updateWidgetNarration(NarrationElementOutput output) {
         defaultButtonNarrationText(output);
     }

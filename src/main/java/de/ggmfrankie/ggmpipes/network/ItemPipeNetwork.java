@@ -1,15 +1,16 @@
 package de.ggmfrankie.ggmpipes.network;
 
 import de.ggmfrankie.ggmpipes.items.tileentity.ItemPipeEntity;
-import de.ggmfrankie.ggmpipes.items.tileentity.PipeEntity;
 import de.ggmfrankie.ggmpipes.items.tileentity.filter.BasicItemFilter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Tuple;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jspecify.annotations.NullMarked;
 
 import javax.annotation.Nullable;
@@ -17,18 +18,50 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemPipeNetwork extends PipeNetwork<ItemPipeEntity> {
-    private List<ItemInputConnection> inputConnections;
-    private List<ItemOutputConnection> outputConnections;
+    private List<ItemExtractConnection> extractConnections;
+    private List<ItemInsertConnection> insertConnections;
+
+    private int cooldown;
+    private int maxCooldown;
 
     public ItemPipeNetwork(){
-        inputConnections = new ArrayList<>(16);
-        outputConnections = new ArrayList<>(16);
+        extractConnections = new ArrayList<>(16);
+        insertConnections = new ArrayList<>(16);
+
+        cooldown = maxCooldown = 20;
     }
 
-    public void update(){
-        for (var extract : outputConnections) {
-            for (var insert : inputConnections) {
+    public void update() {
+        cooldown--;
+        if (cooldown > 0) return;
+        cooldown = maxCooldown;
 
+        for (var extract : insertConnections) {
+            var extractHandler = extract.getItemHandler();
+            if (extractHandler == null) continue;
+            for (var insert : extractConnections) {
+                List<ItemConnection.Slot> availableItemResource = extract.getAvailableItemResources();
+                if (availableItemResource.isEmpty()) continue;
+
+                var insertHandler = insert.getItemHandler();
+                if (insertHandler == null) continue;
+
+                for (var resourceAndSlot : availableItemResource){
+                    try (var tx = Transaction.openRoot()) {
+                        ItemResource resource = resourceAndSlot.resource();
+                        int slot = resourceAndSlot.index();
+
+                        int maxAmount = insertHandler.getCapacityAsInt(slot, resource);
+                        int amount = extractHandler.extract(resource, maxAmount, tx);
+
+                        if (amount == 0){
+                            continue;
+                        }
+
+                        insertHandler.insert(resource, amount, tx);
+                        tx.commit();
+                    }
+                }
             }
         }
     }
@@ -43,8 +76,8 @@ public class ItemPipeNetwork extends PipeNetwork<ItemPipeEntity> {
 
         BlockPos pos = entity.getBlockPos();
         for (var dir : entity.getInputConnections()){
-            inputConnections.add(
-                    new ItemInputConnection(
+            extractConnections.add(
+                    new ItemExtractConnection(
                             serverLevel,
                             pos.relative(dir),
                             dir,
@@ -55,8 +88,8 @@ public class ItemPipeNetwork extends PipeNetwork<ItemPipeEntity> {
         }
 
         for (var dir : entity.getOutputConnections()){
-            outputConnections.add(
-                    new ItemOutputConnection(
+            insertConnections.add(
+                    new ItemInsertConnection(
                             serverLevel,
                             pos.relative(dir),
                             dir,
@@ -74,11 +107,12 @@ public class ItemPipeNetwork extends PipeNetwork<ItemPipeEntity> {
             return;
         }
         BlockPos pos = entity.getBlockPos();
-        inputConnections.removeIf(connection -> connection.getPipePos().equals(pos));
-        outputConnections.removeIf(connection -> connection.getPipePos().equals(pos));
+        extractConnections.removeIf(connection -> connection.getPipePos().equals(pos));
+        insertConnections.removeIf(connection -> connection.getPipePos().equals(pos));
     }
 
     public static abstract class ItemConnection {
+        public record Slot(int index, ItemResource resource){}
         @Nullable protected final BasicItemFilter filter;
 
         protected final Direction direction;
@@ -92,6 +126,20 @@ public class ItemPipeNetwork extends PipeNetwork<ItemPipeEntity> {
             this.itemHandler = BlockCapabilityCache.create(Capabilities.Item.BLOCK, level, connection, direction);
             this.direction = direction;
             this.filter = filter;
+        }
+
+        List<Slot> getAvailableItemResources() {
+            List<Slot> resources = new ArrayList<>();
+            var handler = itemHandler.getCapability();
+            assert handler != null;
+
+            for (int i = 0; i < handler.size(); ++i){
+                var itemResource = handler.getResource(i);
+                if (!itemResource.equals(ItemResource.EMPTY)){
+                    resources.add(new Slot(i, itemResource));
+                }
+            }
+            return resources;
         }
 
         public BlockPos getConnectionPos() {
@@ -117,18 +165,18 @@ public class ItemPipeNetwork extends PipeNetwork<ItemPipeEntity> {
         }
     }
 
-    public static class ItemInputConnection extends ItemConnection {
-        public ItemInputConnection(ServerLevel level, BlockPos connection, Direction direction, BlockPos pipePos, BasicItemFilter filter){
+    public static class ItemExtractConnection extends ItemConnection {
+        public ItemExtractConnection(ServerLevel level, BlockPos connection, Direction direction, BlockPos pipePos, BasicItemFilter filter){
             super(level, connection, direction, pipePos, filter);
 
         }
     }
 
-    public static class ItemOutputConnection extends ItemConnection {
+    public static class ItemInsertConnection extends ItemConnection {
         public int sleepTicks;
         public int extractionLimit;
 
-        public ItemOutputConnection(ServerLevel level, BlockPos connection, Direction direction, BlockPos pipePos, BasicItemFilter filter){
+        public ItemInsertConnection(ServerLevel level, BlockPos connection, Direction direction, BlockPos pipePos, BasicItemFilter filter){
             super(level, connection, direction, pipePos, filter);
             this.sleepTicks = 0;
             this.extractionLimit = 64;
