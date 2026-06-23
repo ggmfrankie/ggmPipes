@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -132,7 +133,7 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
 
     @Override
     @NullMarked
-    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+    public @NotNull CompoundTag getUpdateTag(HolderLookup.Provider provider) {
         CompoundTag updateTag = super.getUpdateTag(provider);
         updateTag.merge(this.saveWithoutMetadata(provider));
         updateTag.merge(this.saveCustomOnly(provider));
@@ -174,6 +175,14 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
         }
         updateConnectionsInNetwork();
         this.setChanged();
+        if (level != null && !level.isClientSide()) {
+            level.sendBlockUpdated(
+                    worldPosition,
+                    getBlockState(),
+                    getBlockState(),
+                    Block.UPDATE_CLIENTS
+            );
+        }
     }
 
     public void setExtract(Direction dir, boolean set){
@@ -185,6 +194,14 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
         }
         updateConnectionsInNetwork();
         this.setChanged();
+        if (level != null && !level.isClientSide()) {
+            level.sendBlockUpdated(
+                    worldPosition,
+                    getBlockState(),
+                    getBlockState(),
+                    Block.UPDATE_CLIENTS
+            );
+        }
     }
 
 
