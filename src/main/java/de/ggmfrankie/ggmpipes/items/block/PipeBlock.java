@@ -1,6 +1,6 @@
 package de.ggmfrankie.ggmpipes.items.block;
 
-import de.ggmfrankie.ggmpipes.utils.DirectionMask;
+import de.ggmfrankie.ggmpipes.utils.DirectionUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -62,12 +62,12 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock 
         VoxelShape[] shapes = new VoxelShape[64];
         for (int mask = 0; mask < 64; mask++){
             VoxelShape shape = SHAPE_CENTER;
-            if ((mask & DirectionMask.NORTH) != 0) shape = Shapes.or(shape, SHAPE_NORTH);
-            if ((mask & DirectionMask.SOUTH) != 0) shape = Shapes.or(shape, SHAPE_SOUTH);
-            if ((mask & DirectionMask.EAST) != 0)  shape = Shapes.or(shape, SHAPE_EAST);
-            if ((mask & DirectionMask.WEST) != 0)  shape = Shapes.or(shape, SHAPE_WEST);
-            if ((mask & DirectionMask.UP) != 0)    shape = Shapes.or(shape, SHAPE_UP);
-            if ((mask & DirectionMask.DOWN) != 0)  shape = Shapes.or(shape, SHAPE_DOWN);
+            if ((mask & DirectionUtils.NORTH) != 0) shape = Shapes.or(shape, SHAPE_NORTH);
+            if ((mask & DirectionUtils.SOUTH) != 0) shape = Shapes.or(shape, SHAPE_SOUTH);
+            if ((mask & DirectionUtils.EAST) != 0)  shape = Shapes.or(shape, SHAPE_EAST);
+            if ((mask & DirectionUtils.WEST) != 0)  shape = Shapes.or(shape, SHAPE_WEST);
+            if ((mask & DirectionUtils.UP) != 0)    shape = Shapes.or(shape, SHAPE_UP);
+            if ((mask & DirectionUtils.DOWN) != 0)  shape = Shapes.or(shape, SHAPE_DOWN);
 
             shapes[mask] = shape.optimize();
         }

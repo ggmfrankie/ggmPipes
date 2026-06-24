@@ -7,8 +7,6 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 
-import java.util.function.Predicate;
-
 public class CapabilityHelper {
 
     @FunctionalInterface
@@ -23,12 +21,12 @@ public class CapabilityHelper {
 
     public static int getMachineConnections(Level level, BlockPos pos, TriPredicate<Level, BlockPos, Direction> filter) {
         int mask = 0;
-        if (filter.run(level, pos.north(), Direction.NORTH)) mask |= DirectionMask.NORTH;
-        if (filter.run(level, pos.south(), Direction.SOUTH)) mask |= DirectionMask.SOUTH;
-        if (filter.run(level, pos.east(),  Direction.EAST))  mask |= DirectionMask.EAST;
-        if (filter.run(level, pos.west(),  Direction.WEST))  mask |= DirectionMask.WEST;
-        if (filter.run(level, pos.above(), Direction.UP))    mask |= DirectionMask.UP;
-        if (filter.run(level, pos.below(), Direction.DOWN))  mask |= DirectionMask.DOWN;
+        if (filter.run(level, pos.north(), Direction.NORTH)) mask |= DirectionUtils.NORTH;
+        if (filter.run(level, pos.south(), Direction.SOUTH)) mask |= DirectionUtils.SOUTH;
+        if (filter.run(level, pos.east(),  Direction.EAST))  mask |= DirectionUtils.EAST;
+        if (filter.run(level, pos.west(),  Direction.WEST))  mask |= DirectionUtils.WEST;
+        if (filter.run(level, pos.above(), Direction.UP))    mask |= DirectionUtils.UP;
+        if (filter.run(level, pos.below(), Direction.DOWN))  mask |= DirectionUtils.DOWN;
 
         return mask;
     }

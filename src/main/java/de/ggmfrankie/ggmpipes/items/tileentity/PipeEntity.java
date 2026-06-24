@@ -1,7 +1,7 @@
 package de.ggmfrankie.ggmpipes.items.tileentity;
 
 import de.ggmfrankie.ggmpipes.items.block.PipeEntityBlock;
-import de.ggmfrankie.ggmpipes.utils.DirectionMask;
+import de.ggmfrankie.ggmpipes.utils.DirectionUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -64,14 +64,14 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
 
     public void disableSide(Direction direction){
         switch (direction){
-            case NORTH -> disabledMask |= DirectionMask.NORTH;
-            case SOUTH -> disabledMask |= DirectionMask.SOUTH;
+            case NORTH -> disabledMask |= DirectionUtils.NORTH;
+            case SOUTH -> disabledMask |= DirectionUtils.SOUTH;
 
-            case EAST  -> disabledMask |= DirectionMask.EAST;
-            case WEST  -> disabledMask |= DirectionMask.WEST;
+            case EAST  -> disabledMask |= DirectionUtils.EAST;
+            case WEST  -> disabledMask |= DirectionUtils.WEST;
 
-            case UP    -> disabledMask |= DirectionMask.UP;
-            case DOWN  -> disabledMask |= DirectionMask.DOWN;
+            case UP    -> disabledMask |= DirectionUtils.UP;
+            case DOWN  -> disabledMask |= DirectionUtils.DOWN;
         }
     }
 
@@ -150,7 +150,7 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getUpdatePacket() {
+    public Packet<@NotNull ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
@@ -167,7 +167,7 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     }
 
     public void setInsert(Direction dir, boolean set){
-        int mask = DirectionMask.getMaskFromDirection(dir);
+        int mask = DirectionUtils.getMaskFromDirection(dir);
         if (set){
             this.insertMask |= mask;
         } else {
@@ -186,7 +186,7 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     }
 
     public void setExtract(Direction dir, boolean set){
-        int mask = DirectionMask.getMaskFromDirection(dir);
+        int mask = DirectionUtils.getMaskFromDirection(dir);
         if (set){
             this.extractMask |= mask;
         } else {
@@ -230,11 +230,11 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     }
 
     public List<Direction> getInputConnections() {
-        return DirectionMask.getDirectionsFromMask(this.extractMask);
+        return DirectionUtils.getDirectionsFromMask(this.extractMask);
     }
 
     public List<Direction> getOutputConnections() {
-        return DirectionMask.getDirectionsFromMask(this.insertMask);
+        return DirectionUtils.getDirectionsFromMask(this.insertMask);
     }
 
     public void setClickedDirection(Direction dir) {

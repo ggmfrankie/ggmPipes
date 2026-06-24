@@ -5,7 +5,7 @@ import com.mojang.math.Axis;
 import de.ggmfrankie.ggmpipes.items.tileentity.PipeEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.ggmfrankie.ggmpipes.registry.ModBlockEntities;
-import de.ggmfrankie.ggmpipes.utils.DirectionMask;
+import de.ggmfrankie.ggmpipes.utils.DirectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -114,12 +114,12 @@ public abstract class PipeRenderer implements BlockEntityRenderer<PipeEntity, Pi
         }
         int mask = pipeRenderState.connectionMask;
 
-        if ((mask & DirectionMask.NORTH) != 0) renderConnection(model, Direction.NORTH, stack, submitNodeCollector, pipeRenderState.lightCoords, OverlayTexture.NO_OVERLAY);
-        if ((mask & DirectionMask.SOUTH) != 0) renderConnection(model, Direction.SOUTH, stack, submitNodeCollector, pipeRenderState.lightCoords, OverlayTexture.NO_OVERLAY);
-        if ((mask & DirectionMask.EAST) != 0)  renderConnection(model, Direction.EAST, stack, submitNodeCollector, pipeRenderState.lightCoords, OverlayTexture.NO_OVERLAY);
-        if ((mask & DirectionMask.WEST) != 0)  renderConnection(model, Direction.WEST, stack, submitNodeCollector, pipeRenderState.lightCoords, OverlayTexture.NO_OVERLAY);
-        if ((mask & DirectionMask.UP) != 0)    renderConnection(model, Direction.UP, stack, submitNodeCollector, pipeRenderState.lightCoords, OverlayTexture.NO_OVERLAY);
-        if ((mask & DirectionMask.DOWN) != 0)  renderConnection(model, Direction.DOWN, stack, submitNodeCollector, pipeRenderState.lightCoords, OverlayTexture.NO_OVERLAY);
+        if ((mask & DirectionUtils.NORTH) != 0) renderConnection(model, Direction.NORTH, stack, submitNodeCollector, pipeRenderState.lightCoords, OverlayTexture.NO_OVERLAY);
+        if ((mask & DirectionUtils.SOUTH) != 0) renderConnection(model, Direction.SOUTH, stack, submitNodeCollector, pipeRenderState.lightCoords, OverlayTexture.NO_OVERLAY);
+        if ((mask & DirectionUtils.EAST) != 0)  renderConnection(model, Direction.EAST, stack, submitNodeCollector, pipeRenderState.lightCoords, OverlayTexture.NO_OVERLAY);
+        if ((mask & DirectionUtils.WEST) != 0)  renderConnection(model, Direction.WEST, stack, submitNodeCollector, pipeRenderState.lightCoords, OverlayTexture.NO_OVERLAY);
+        if ((mask & DirectionUtils.UP) != 0)    renderConnection(model, Direction.UP, stack, submitNodeCollector, pipeRenderState.lightCoords, OverlayTexture.NO_OVERLAY);
+        if ((mask & DirectionUtils.DOWN) != 0)  renderConnection(model, Direction.DOWN, stack, submitNodeCollector, pipeRenderState.lightCoords, OverlayTexture.NO_OVERLAY);
 
     }
 
