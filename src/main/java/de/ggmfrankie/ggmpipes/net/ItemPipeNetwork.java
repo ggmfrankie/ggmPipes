@@ -74,7 +74,7 @@ public class ItemPipeNetwork extends PipeNetwork<ItemPipeEntity> {
         this.removeAllNodes(entity);
 
         BlockPos pos = entity.getBlockPos();
-        for (var dir : entity.getInputConnections()){
+        for (var dir : entity.getExtractConnections()){
             extractConnections.add(
                     new ItemExtractConnection(
                             serverLevel,
@@ -86,7 +86,7 @@ public class ItemPipeNetwork extends PipeNetwork<ItemPipeEntity> {
             );
         }
 
-        for (var dir : entity.getOutputConnections()){
+        for (var dir : entity.getInsertConnections()){
             insertConnections.add(
                     new ItemInsertConnection(
                             serverLevel,

@@ -8,31 +8,36 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 import org.jspecify.annotations.NullMarked;
+
+import java.awt.*;
+import java.util.function.Consumer;
 
 
 public class ToggleButton extends AbstractButton {
 
     private boolean state;
-    private final ToggleAction action;
+    private final Consumer<ToggleButton> action;
     private final Font font;
 
-    public ToggleButton(int x, int y, int width, int height, boolean initial, ToggleAction action, Font font) {
+    public ToggleButton(int x, int y, int width, int height, boolean initial, String label ,Consumer<ToggleButton> action) {
         super(x, y, width, height, Component.empty());
         state = initial;
         this.action = action;
-        this.font = font;
-        updateMessage();
+        this.font = Minecraft.getInstance().font;
+        setMessage(Component.literal(label));
     }
 
     @Override
     @NullMarked
     protected void extractContents(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float partialTicks) {
         this.extractDefaultSprite(guiGraphicsExtractor);
-        int textColor = 0xFFFFFF;
-        if (!this.active) textColor = 0xA0A0A0;
-        guiGraphicsExtractor.text(font, "this.getMessage()",
-                this.getX() + (this.width - this.font.width("this.getMessage()")) / 2,
+        int textColor = state ? ARGB.color(20, 200, 20) : ARGB.color(200, 20, 20);
+
+        Component message = this.getMessage();
+        guiGraphicsExtractor.text(font, message,
+                this.getX() + (this.width - this.font.width(message)) / 2,
                 this.getY() + (this.height - 8) / 2,
                 textColor
         );
@@ -42,8 +47,7 @@ public class ToggleButton extends AbstractButton {
     @NullMarked
     public void onPress(InputWithModifiers input) {
         state = !state;
-        action.accept(state, this);
-        updateMessage();
+        action.accept(this);
         this.playDownSound(Minecraft.getInstance().getSoundManager());
     }
 
@@ -54,15 +58,11 @@ public class ToggleButton extends AbstractButton {
     }
 
     private void updateMessage() {
-        this.setMessage(Component.literal(state ? "ON" : "OFF"));
+
     }
 
     public boolean isToggled() {
         return state;
     }
 
-    @FunctionalInterface
-    public interface ToggleAction{
-        void accept(boolean state, ToggleButton button);
-    }
 }

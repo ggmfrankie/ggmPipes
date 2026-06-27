@@ -4,6 +4,8 @@ import de.ggmfrankie.ggmpipes.items.tileentity.ItemPipeEntity;
 import de.ggmfrankie.ggmpipes.items.tileentity.PipeEntity;
 import de.ggmfrankie.ggmpipes.items.tileentity.filter.BasicItemFilter;
 import de.ggmfrankie.ggmpipes.registry.ModMenuTypes;
+import de.ggmfrankie.ggmpipes.utils.DirectionUtils;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.Container;
@@ -17,31 +19,40 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jspecify.annotations.NullMarked;
 
 public class ItemPipeGUIMenu extends AbstractContainerMenu {
-    private final ItemPipeEntity blockEntity;
+    private final BlockPos pos;
     private final Direction clickedDirection;
-    private final Level level;
+    private final boolean isInserting;
+    private final boolean isExtracting;
 
     public ItemPipeGUIMenu(int containerId, Inventory inv, FriendlyByteBuf extraData) {
-        this(containerId, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()), Direction.from3DDataValue(extraData.readByte()));
+        this(containerId, inv, extraData.readBlockPos(), Direction.from3DDataValue(extraData.readByte()));
     }
 
-    public ItemPipeGUIMenu(int containerId, Inventory inv, BlockEntity blockEntity, Direction direction) {
+    public ItemPipeGUIMenu(int containerId, Inventory inventory, BlockPos pos, Direction direction) {
         super(ModMenuTypes.ITEM_PIPE_MENU.get(), containerId);
-        this.blockEntity = ((ItemPipeEntity) blockEntity);
-        this.level = inv.player.level();
+        this.pos = pos;
         this.clickedDirection = direction;
 
-        addPlayerInventory(inv);
-        addPlayerHotbar(inv);
+        if (inventory.player.level().getBlockEntity(pos) instanceof ItemPipeEntity pipe) {
+            this.isInserting = pipe.isInserting(direction);
+            this.isExtracting = pipe.isExtracting(direction);
 
-        BasicItemFilter insertFilter  = this.blockEntity.getInsertFilters().get(direction);
-        BasicItemFilter extractFilter = this.blockEntity.getExtractFilters().get(direction);
+            BasicItemFilter insertFilter  = pipe.getInsertFilters().get(direction);
+            BasicItemFilter extractFilter = pipe.getExtractFilters().get(direction);
 
-        assert insertFilter  != null;
-        assert extractFilter != null;
+            assert insertFilter  != null;
+            assert extractFilter != null;
 
-        addFilter(insertFilter, 0);
-        addFilter(extractFilter, 90);
+            addFilter(insertFilter, 0);
+            addFilter(extractFilter, 90);
+
+        } else {
+            this.isInserting = false;
+            this.isExtracting = false;
+        }
+
+        addPlayerInventory(inventory);
+        addPlayerHotbar(inventory);
     }
 
     @Override
@@ -53,8 +64,7 @@ public class ItemPipeGUIMenu extends AbstractContainerMenu {
     @Override
     @NullMarked
     public boolean stillValid(Player player) {
-        if (blockEntity == null) return false;
-        return player.distanceToSqr(blockEntity.getBlockPos().getCenter()) <= 64.0;
+        return player.distanceToSqr(pos.getCenter()) <= 64.0;
     }
 
     private void addPlayerInventory(Inventory playerInventory){
@@ -83,7 +93,15 @@ public class ItemPipeGUIMenu extends AbstractContainerMenu {
         return clickedDirection;
     }
 
-    public ItemPipeEntity getBlockEntity(){
-        return blockEntity;
+    public BlockPos getBlockEntityPos(){
+        return pos;
+    }
+
+    public boolean isInserting() {
+        return isInserting;
+    }
+
+    public boolean isExtracting() {
+        return isExtracting;
     }
 }

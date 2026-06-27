@@ -169,20 +169,32 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
 
     private void recalculateConnections(){
         int newMask = calculateConnectionMask(level, worldPosition) & ~disabledMask;
-        setExtractMask(extractMask & newMask);
+        extractMask &= newMask;
         //this.extractMask &= newMask;
-        setInsertMask(insertMask & newMask);
-        setExtractMask(extractMask | newMask);
+        insertMask &= newMask;
+        insertMask |= newMask;
+
+    }
+
+    private boolean checkIfConnectionRemoved(Direction dir){
+        return !isInserting(dir) && !isExtracting(dir);
+    }
+
+    private void handleConnectionRemovalForBlock(Direction dir){
+
     }
 
     public void setInsert(Direction dir, boolean set){
         int mask = DirectionUtils.getMaskFromDirection(dir);
         if (set){
-            setInsertMask(insertMask | mask);
+            insertMask |= mask;
+            disabledMask &= mask;
         } else {
-            setInsertMask(insertMask & ~mask);
+            insertMask &= ~mask;
+            disabledMask |= mask;
         }
         updateConnectionsInNetwork();
+
         this.setChanged();
         if (level != null && !level.isClientSide()) {
             level.sendBlockUpdated(
@@ -215,7 +227,6 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
         }
     }
 
-
     @Override
     @NullMarked
     public Component getDisplayName() {
@@ -240,11 +251,11 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
         return this.insertMask;
     }
 
-    public List<Direction> getInputConnections() {
+    public List<Direction> getExtractConnections() {
         return DirectionUtils.getDirectionsFromMask(this.extractMask);
     }
 
-    public List<Direction> getOutputConnections() {
+    public List<Direction> getInsertConnections() {
         return DirectionUtils.getDirectionsFromMask(this.insertMask);
     }
 
@@ -254,5 +265,13 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
 
     public Direction getClickedDirection() {
         return this.clickedDirection;
+    }
+
+    public boolean isInserting(Direction dir){
+        return (DirectionUtils.getMaskFromDirection(dir) & insertMask) != 0;
+    }
+
+    public boolean isExtracting(Direction dir){
+        return (DirectionUtils.getMaskFromDirection(dir) & extractMask) != 0;
     }
 }

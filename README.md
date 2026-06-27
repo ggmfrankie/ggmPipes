@@ -3,9 +3,9 @@ Documentation: https://docs.neoforged.net/docs
 # TODO
 
 - [ ] Network
-  - [ ] add new pipe entities to the network
-  - [ ] sync data to the network
-  - [ ] create an item routing algorithm
+  - [x] add new pipe entities to the network
+  - [x] sync data to the network
+  - [x] create an item routing algorithm
   - [ ] Optimize processing
   - [ ] rebuild network on unload
   - [ ] recalculation on pipe break
@@ -13,14 +13,15 @@ Documentation: https://docs.neoforged.net/docs
 - [ ] TileEntity
   - [x] creation on machine placement
   - [x] creation on pipe next to machine placement
-  - [ ] make block entity respect disabled sides
-  - [ ] proper deletion of the existing tile entity
+  - [x] make block entity respect disabled sides
+  - [x] proper deletion of the existing tile entity
   - [ ] proper serialization of filters
-  - [ ] sign out of network on unload/deletion
+  - [x] sign out of network on unload/deletion
   - [ ] GUI fix filter slots
-  - [ ] GUI add extract/insert button
+  - [x] GUI add extract/insert button
   - [ ] GUI sync with network
 - [ ] Block
   - [ ] Make block respect disabled sides
+  - [ ] Update connections on disconnect through pipe entity
 
     

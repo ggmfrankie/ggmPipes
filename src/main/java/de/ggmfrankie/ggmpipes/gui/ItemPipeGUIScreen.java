@@ -3,8 +3,11 @@ package de.ggmfrankie.ggmpipes.gui;
 import de.ggmfrankie.ggmpipes.ggmPipes;
 import de.ggmfrankie.ggmpipes.gui.widget.ToggleButton;
 import de.ggmfrankie.ggmpipes.items.tileentity.ItemPipeEntity;
+import de.ggmfrankie.ggmpipes.items.tileentity.PipeEntity;
+import de.ggmfrankie.ggmpipes.networking.SetConnectionsPacket;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -13,8 +16,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+
+import java.util.function.BiConsumer;
 
 public class ItemPipeGUIScreen extends ScreenBase<ItemPipeGUIMenu> {
     public static final Identifier BACKGROUND_TEXTURE = Identifier.fromNamespaceAndPath(ggmPipes.MODID, "textures/gui/pipe/pipe_gui.png");
@@ -40,19 +47,30 @@ public class ItemPipeGUIScreen extends ScreenBase<ItemPipeGUIMenu> {
     @Override
     protected void init() {
         super.init();
-        this.toggleInsertButton = new ToggleButton(leftPos + 80, topPos + 20, 15, 20, false,
-                (boolean state, ToggleButton button) -> {
-                    Direction dir = menu.getClickedDirection();
-                    menu.getBlockEntity().setInsert(dir, state);
-                },
-                this.getFont()
+        BlockPos pos = menu.getBlockEntityPos();
+        Direction dir = menu.getClickedDirection();
+
+        this.toggleInsertButton = new ToggleButton(leftPos + 80, topPos + 20, 15, 20, menu.isInserting(), "I",
+                (ToggleButton button) -> {
+                    boolean state = button.isToggled();
+                    ClientPacketDistributor.sendToServer(new SetConnectionsPacket(
+                            pos,
+                            dir,
+                            true,
+                            state
+                    ));
+                }
         );
-        this.toggleExtractButton = new ToggleButton(leftPos + 80, topPos + 40, 15, 20, false,
-                (boolean state, ToggleButton button) -> {
-                    Direction dir = menu.getClickedDirection();
-                    menu.getBlockEntity().setExtract(dir, state);
-                },
-                this.getFont()
+        this.toggleExtractButton = new ToggleButton(leftPos + 80, topPos + 40, 15, 20, menu.isExtracting(), "E",
+                (ToggleButton button) -> {
+                    boolean state = button.isToggled();
+                    ClientPacketDistributor.sendToServer(new SetConnectionsPacket(
+                            pos,
+                            dir,
+                            false,
+                            state
+                    ));
+                }
         );
         addRenderableWidget(toggleInsertButton);
         addRenderableWidget(toggleExtractButton);

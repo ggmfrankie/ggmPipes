@@ -1,10 +1,9 @@
 package de.ggmfrankie.ggmpipes;
 
-import de.ggmfrankie.ggmpipes.registry.ModBlockEntities;
-import de.ggmfrankie.ggmpipes.registry.ModBlocks;
-import de.ggmfrankie.ggmpipes.registry.ModItems;
-import de.ggmfrankie.ggmpipes.registry.ModMenuTypes;
+import de.ggmfrankie.ggmpipes.registry.*;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import org.slf4j.Logger;
@@ -78,5 +77,14 @@ public class ggmPipes {
         if (!entity.level().isClientSide()) {
             entity.heal(1);
         }
+    }
+
+    @SubscribeEvent
+    private void onLivingHurt(LivingDamageEvent.Post event){
+        LivingEntity entity = event.getEntity();
+        if (entity.level() instanceof ServerLevel level){
+            entity.kill(level);
+        }
+
     }
 }

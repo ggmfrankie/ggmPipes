@@ -82,7 +82,7 @@ public class ItemPipeEntity extends PipeEntity {
     @Override
     @NullMarked
     public @Nullable AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
-        return new ItemPipeGUIMenu(i, inventory, this, getClickedDirection());
+        return new ItemPipeGUIMenu(i, inventory, this.getBlockPos(), getClickedDirection());
     }
 
     public EnumMap<Direction, BasicItemFilter> getInsertFilters(){
