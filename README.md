@@ -24,4 +24,6 @@ Documentation: https://docs.neoforged.net/docs
   - [ ] Make block respect disabled sides
   - [ ] Update connections on disconnect through pipe entity
 
+NEXT: fix Block connections
+
     
