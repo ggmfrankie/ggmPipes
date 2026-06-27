@@ -1,7 +1,7 @@
 package de.ggmfrankie.ggmpipes;
 
 import de.ggmfrankie.ggmpipes.items.tileentity.ItemPipeEntity;
-import de.ggmfrankie.ggmpipes.network.ItemPipeNetwork;
+import de.ggmfrankie.ggmpipes.net.ItemPipeNetwork;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;

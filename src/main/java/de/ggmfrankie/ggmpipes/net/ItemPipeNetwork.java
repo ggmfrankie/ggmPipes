@@ -1,11 +1,10 @@
-package de.ggmfrankie.ggmpipes.network;
+package de.ggmfrankie.ggmpipes.net;
 
 import de.ggmfrankie.ggmpipes.items.tileentity.ItemPipeEntity;
 import de.ggmfrankie.ggmpipes.items.tileentity.filter.BasicItemFilter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Tuple;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.ResourceHandler;

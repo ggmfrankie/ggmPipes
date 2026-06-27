@@ -104,6 +104,14 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
         return null;
     }
 
+    private void setInsertMask(int mask){
+        this.insertMask = mask;
+    }
+
+    private void setExtractMask(int mask){
+        this.extractMask = mask;
+    }
+
     @Override
     public abstract void onChunkUnloaded();
 
@@ -116,8 +124,8 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     protected void loadAdditional(ValueInput valueInput){
         super.loadAdditional(valueInput);
 
-        extractMask = valueInput.getIntOr("extractMask", 0);
-        insertMask = valueInput.getIntOr("insertMask", 0);
+        setExtractMask(valueInput.getIntOr("extractMask", 0));
+        setInsertMask(valueInput.getIntOr("insertMask", 0));
         disabledMask = valueInput.getIntOr("disabledMask", 0);
     }
 
@@ -133,7 +141,7 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
 
     @Override
     @NullMarked
-    public @NotNull CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
         CompoundTag updateTag = super.getUpdateTag(provider);
         updateTag.merge(this.saveWithoutMetadata(provider));
         updateTag.merge(this.saveCustomOnly(provider));
@@ -144,8 +152,8 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     @NullMarked
     public void handleUpdateTag(ValueInput input) {
         super.handleUpdateTag(input);
-        extractMask = input.getIntOr("extractMask", 0);
-        insertMask = input.getIntOr("insertMask", 0);
+        setExtractMask(input.getIntOr("extractMask", 0));
+        setInsertMask(input.getIntOr("insertMask", 0));
         disabledMask = input.getIntOr("disabledMask", 0);
     }
 
@@ -161,17 +169,18 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
 
     private void recalculateConnections(){
         int newMask = calculateConnectionMask(level, worldPosition) & ~disabledMask;
-        this.extractMask &= newMask;
-        this.insertMask &= newMask;
-        this.extractMask |= newMask;
+        setExtractMask(extractMask & newMask);
+        //this.extractMask &= newMask;
+        setInsertMask(insertMask & newMask);
+        setExtractMask(extractMask | newMask);
     }
 
     public void setInsert(Direction dir, boolean set){
         int mask = DirectionUtils.getMaskFromDirection(dir);
         if (set){
-            this.insertMask |= mask;
+            setInsertMask(insertMask | mask);
         } else {
-            this.insertMask &= ~mask;
+            setInsertMask(insertMask & ~mask);
         }
         updateConnectionsInNetwork();
         this.setChanged();
@@ -188,9 +197,11 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     public void setExtract(Direction dir, boolean set){
         int mask = DirectionUtils.getMaskFromDirection(dir);
         if (set){
-            this.extractMask |= mask;
+            setExtractMask(extractMask | mask);
+            //this.extractMask |= mask;
         } else {
-            this.extractMask &= ~mask;
+            setExtractMask(extractMask & ~mask);
+            //this.extractMask &= ~mask;
         }
         updateConnectionsInNetwork();
         this.setChanged();

@@ -1,4 +1,4 @@
-package de.ggmfrankie.ggmpipes.network;
+package de.ggmfrankie.ggmpipes.net;
 
 import de.ggmfrankie.ggmpipes.items.tileentity.PipeEntity;
 
