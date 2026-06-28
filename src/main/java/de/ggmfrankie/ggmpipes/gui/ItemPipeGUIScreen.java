@@ -2,26 +2,15 @@ package de.ggmfrankie.ggmpipes.gui;
 
 import de.ggmfrankie.ggmpipes.ggmPipes;
 import de.ggmfrankie.ggmpipes.gui.widget.ToggleButton;
-import de.ggmfrankie.ggmpipes.items.tileentity.ItemPipeEntity;
-import de.ggmfrankie.ggmpipes.items.tileentity.PipeEntity;
 import de.ggmfrankie.ggmpipes.networking.SetConnectionsPacket;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-
-import java.util.function.BiConsumer;
 
 public class ItemPipeGUIScreen extends ScreenBase<ItemPipeGUIMenu> {
     public static final Identifier BACKGROUND_TEXTURE = Identifier.fromNamespaceAndPath(ggmPipes.MODID, "textures/gui/pipe/pipe_gui.png");
