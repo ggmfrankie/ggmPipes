@@ -76,14 +76,25 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock 
 
     public static int calculateMask(BlockState state) {
         int mask = 0;
-        if (state.getValue(NORTH)) mask |= 1;
-        if (state.getValue(SOUTH)) mask |= 2;
-        if (state.getValue(EAST))  mask |= 4;
-        if (state.getValue(WEST))  mask |= 8;
-        if (state.getValue(UP))    mask |= 16;
-        if (state.getValue(DOWN))  mask |= 32;
+        if (state.getValue(NORTH)) mask |= DirectionUtils.NORTH;
+        if (state.getValue(SOUTH)) mask |= DirectionUtils.SOUTH;
+        if (state.getValue(EAST))  mask |= DirectionUtils.EAST;
+        if (state.getValue(WEST))  mask |= DirectionUtils.WEST;
+        if (state.getValue(UP))    mask |= DirectionUtils.UP;
+        if (state.getValue(DOWN))  mask |= DirectionUtils.DOWN;
 
         return mask;
+    }
+
+    protected static BooleanProperty getPropertyFromDirection(Direction dir){
+        return switch (dir){
+            case NORTH -> NORTH;
+            case SOUTH -> SOUTH;
+            case EAST  -> EAST;
+            case WEST  -> WEST;
+            case UP    -> UP;
+            case DOWN  -> DOWN;
+        };
     }
 
     @Override

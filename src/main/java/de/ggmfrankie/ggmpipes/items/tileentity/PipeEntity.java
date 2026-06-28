@@ -62,19 +62,6 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
         }
     }
 
-    public void disableSide(Direction direction){
-        switch (direction){
-            case NORTH -> disabledMask |= DirectionUtils.NORTH;
-            case SOUTH -> disabledMask |= DirectionUtils.SOUTH;
-
-            case EAST  -> disabledMask |= DirectionUtils.EAST;
-            case WEST  -> disabledMask |= DirectionUtils.WEST;
-
-            case UP    -> disabledMask |= DirectionUtils.UP;
-            case DOWN  -> disabledMask |= DirectionUtils.DOWN;
-        }
-    }
-
     protected UUID getOrCreateNetwork(Level level, BlockPos start){
         Set<BlockPos> visited = new HashSet<>();
         Queue<BlockPos> queue = new ArrayDeque<>();
@@ -104,13 +91,6 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
         return null;
     }
 
-    private void setInsertMask(int mask){
-        this.insertMask = mask;
-    }
-
-    private void setExtractMask(int mask){
-        this.extractMask = mask;
-    }
 
     @Override
     public abstract void onChunkUnloaded();
@@ -124,8 +104,8 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     protected void loadAdditional(ValueInput valueInput){
         super.loadAdditional(valueInput);
 
-        setExtractMask(valueInput.getIntOr("extractMask", 0));
-        setInsertMask(valueInput.getIntOr("insertMask", 0));
+        extractMask  = valueInput.getIntOr("extractMask", 0);
+        insertMask   = valueInput.getIntOr("insertMask", 0);
         disabledMask = valueInput.getIntOr("disabledMask", 0);
     }
 
@@ -152,8 +132,8 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     @NullMarked
     public void handleUpdateTag(ValueInput input) {
         super.handleUpdateTag(input);
-        setExtractMask(input.getIntOr("extractMask", 0));
-        setInsertMask(input.getIntOr("insertMask", 0));
+        extractMask  = input.getIntOr("extractMask", 0);
+        insertMask   = input.getIntOr("insertMask", 0);
         disabledMask = input.getIntOr("disabledMask", 0);
     }
 
@@ -170,58 +150,71 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     private void recalculateConnections(){
         int newMask = calculateConnectionMask(level, worldPosition) & ~disabledMask;
         extractMask &= newMask;
-        //this.extractMask &= newMask;
         insertMask &= newMask;
         insertMask |= newMask;
-
     }
 
-    private boolean checkIfConnectionRemoved(Direction dir){
+    private boolean connectionRemoved(Direction dir){
         return !isInserting(dir) && !isExtracting(dir);
     }
 
-    private void handleConnectionRemovalForBlock(Direction dir){
+    private void removeConnectionFromBlock(Direction dir){
+        assert level != null;
+        BlockState oldState = level.getBlockState(worldPosition);
+        BlockState newState = PipeEntityBlock.getBlockStateForConnectionRemoved(oldState, dir);
 
+        boolean success = level.setBlock(worldPosition, newState, Block.UPDATE_ALL);
     }
 
     public void setInsert(Direction dir, boolean set){
+        if (level == null || level.isClientSide()) return;
+
         int mask = DirectionUtils.getMaskFromDirection(dir);
         if (set){
             insertMask |= mask;
-            disabledMask &= mask;
+            disabledMask &= ~mask;
         } else {
             insertMask &= ~mask;
             disabledMask |= mask;
         }
-        updateConnectionsInNetwork();
 
+        updateConnectionsInNetwork();
+        BlockState newState = getBlockState();
         this.setChanged();
-        if (level != null && !level.isClientSide()) {
+
+        if (connectionRemoved(dir)) {
+            removeConnectionFromBlock(dir);
+        } else {
             level.sendBlockUpdated(
                     worldPosition,
                     getBlockState(),
-                    getBlockState(),
+                    newState,
                     Block.UPDATE_CLIENTS
             );
         }
     }
 
     public void setExtract(Direction dir, boolean set){
+        if (level == null || level.isClientSide()) return;
+
         int mask = DirectionUtils.getMaskFromDirection(dir);
         if (set){
-            setExtractMask(extractMask | mask);
-            //this.extractMask |= mask;
+            this.extractMask |= mask;
         } else {
-            setExtractMask(extractMask & ~mask);
-            //this.extractMask &= ~mask;
+            this.extractMask &= ~mask;
         }
+
         updateConnectionsInNetwork();
+        BlockState newState = getBlockState();
         this.setChanged();
-        if (level != null && !level.isClientSide()) {
+
+        if (connectionRemoved(dir)) {
+            removeConnectionFromBlock(dir);
+        } else {
             level.sendBlockUpdated(
                     worldPosition,
                     getBlockState(),
-                    getBlockState(),
+                    newState,
                     Block.UPDATE_CLIENTS
             );
         }

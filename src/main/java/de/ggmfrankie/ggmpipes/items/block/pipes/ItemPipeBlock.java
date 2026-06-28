@@ -16,9 +16,9 @@ public class ItemPipeBlock extends PipeBlock {
 
     @Override
     protected boolean canConnect(Level level, BlockPos pos, Direction dir) {
-        BlockState state = level.getBlockState(pos);
-        return state.getBlock() instanceof ItemPipeBlock ||
-               state.getBlock() instanceof ItemPipeEntityBlock;
+        Block block = level.getBlockState(pos).getBlock();
+        return block instanceof ItemPipeBlock ||
+               block instanceof ItemPipeEntityBlock;
     }
 
     @Override
