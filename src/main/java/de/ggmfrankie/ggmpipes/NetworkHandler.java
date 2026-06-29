@@ -3,6 +3,7 @@ package de.ggmfrankie.ggmpipes;
 import de.ggmfrankie.ggmpipes.items.tileentity.ItemPipeEntity;
 import de.ggmfrankie.ggmpipes.net.ItemPipeNetwork;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
@@ -10,7 +11,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.*;
 
-@EventBusSubscriber(value = Dist.DEDICATED_SERVER)
+@EventBusSubscriber
 public class NetworkHandler {
     private static final Map<UUID, ItemPipeNetwork> itemPipeNetworks = new HashMap<>();
 
@@ -32,6 +33,9 @@ public class NetworkHandler {
         assert network != null;
 
         network.removeAllNodes(entity);
+        if (network.isEmpty()){
+            itemPipeNetworks.remove(id);
+        }
     }
 
     @SubscribeEvent
@@ -44,5 +48,9 @@ public class NetworkHandler {
     @SubscribeEvent
     public static void onServerStop(ServerStoppingEvent event) {
         //TODO
+    }
+
+    public static void register(IEventBus eventBus){
+
     }
 }

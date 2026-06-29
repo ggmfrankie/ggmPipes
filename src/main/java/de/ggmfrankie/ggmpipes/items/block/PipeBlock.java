@@ -3,9 +3,12 @@ package de.ggmfrankie.ggmpipes.items.block;
 import de.ggmfrankie.ggmpipes.utils.DirectionUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
@@ -86,6 +89,19 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock 
         return mask;
     }
 
+    public static List<Direction> getPipeConnections(BlockState state) {
+        List<Direction> directions = new ArrayList<>(6);
+
+        if (state.getValue(NORTH)) directions.add(Direction.NORTH);
+        if (state.getValue(SOUTH)) directions.add(Direction.SOUTH);
+        if (state.getValue(EAST))  directions.add(Direction.EAST);
+        if (state.getValue(WEST))  directions.add(Direction.WEST);
+        if (state.getValue(UP))    directions.add(Direction.UP);
+        if (state.getValue(DOWN))  directions.add(Direction.DOWN);
+
+        return directions;
+    }
+
     protected static BooleanProperty getPropertyFromDirection(Direction dir){
         return switch (dir){
             case NORTH -> NORTH;
@@ -140,6 +156,10 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock 
         this.update(level, pos);
     }
 
+    public static BlockState getBlockStateForConnectionRemoved(BlockState state, Direction dir){
+        return state.setValue(getPropertyFromDirection(dir), false);
+    }
+
     /**
      * @apiNote this method is called on block placement and on neighbor changed
      */
@@ -158,22 +178,16 @@ public abstract class PipeBlock extends Block implements SimpleWaterloggedBlock 
                 .setValue(DOWN,  canConnect(level, pos.below(), Direction.DOWN));
     }
 
-    public static List<Direction> getPipeConnections(BlockState state) {
-        List<Direction> directions = new ArrayList<>(6);
-
-        if (state.getValue(NORTH)) directions.add(Direction.NORTH);
-        if (state.getValue(SOUTH)) directions.add(Direction.SOUTH);
-        if (state.getValue(EAST))  directions.add(Direction.EAST);
-        if (state.getValue(WEST))  directions.add(Direction.WEST);
-        if (state.getValue(UP))    directions.add(Direction.UP);
-        if (state.getValue(DOWN))  directions.add(Direction.DOWN);
-
-        return directions;
+    @Override
+    @NullMarked
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        if (state.getBlock().equals(oldState.getBlock())) return;
+        this.update(level, pos);
     }
 
     @Override
     @NullMarked
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
-        this.update(level, pos);
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction directionToNeighbour, BlockPos neighbourPos, BlockState neighbourState, RandomSource random) {
+        return state;
     }
 }

@@ -6,6 +6,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -40,6 +41,8 @@ public class ggmPipes {
         ModItems.register(modEventBus);
         ModMenuTypes.register(modEventBus);
 
+        NetworkHandler.register(modEventBus);
+
 
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (ggmPipes) to respond directly to events.
@@ -67,7 +70,6 @@ public class ggmPipes {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
     }
 
     @SubscribeEvent

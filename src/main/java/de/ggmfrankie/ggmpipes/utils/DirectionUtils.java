@@ -1,6 +1,8 @@
 package de.ggmfrankie.ggmpipes.utils;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,4 +42,13 @@ public class DirectionUtils {
             case DOWN  -> DirectionUtils.DOWN;
         };
     }
+
+    public static Direction fromTo(BlockPos from, BlockPos to){
+        return Direction.getApproximateNearest(
+                to.getX() - from.getX(),
+                to.getY() - from.getY(),
+                to.getZ() - from.getZ()
+        );
+    }
 }
+

@@ -1,6 +1,8 @@
 package de.ggmfrankie.ggmpipes.items.tileentity;
 
+import de.ggmfrankie.ggmpipes.items.block.PipeBlock;
 import de.ggmfrankie.ggmpipes.items.block.PipeEntityBlock;
+import de.ggmfrankie.ggmpipes.registry.ModBlocks;
 import de.ggmfrankie.ggmpipes.utils.DirectionUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -16,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -72,7 +75,7 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
         while (!queue.isEmpty()){
             BlockPos curr = queue.remove();
             BlockState state = level.getBlockState(curr);
-            List<Direction> pipeConnections = PipeEntityBlock.getPipeConnections(state);
+            List<Direction> pipeConnections = PipeBlock.getPipeConnections(state);
 
             for (var dir : pipeConnections) {
                 BlockPos neighbor = curr.relative(dir);
@@ -85,7 +88,8 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
 
                 visited.add(neighbor);
 
-                if (level.getBlockState(neighbor).getBlock() instanceof PipeEntityBlock) queue.add(neighbor);
+                if (level.getBlockState(neighbor).getBlock() instanceof PipeBlock)
+                    queue.add(neighbor);
             }
         }
         return null;
@@ -159,11 +163,18 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
     }
 
     private void removeConnectionFromBlock(Direction dir){
-        assert level != null;
-        BlockState oldState = level.getBlockState(worldPosition);
-        BlockState newState = PipeEntityBlock.getBlockStateForConnectionRemoved(oldState, dir);
+        if (level == null) return;
 
-        boolean success = level.setBlock(worldPosition, newState, Block.UPDATE_ALL);
+        BlockState newState;
+        if (false && !this.hasConnection()){
+            //TODO
+        } else {
+            BlockState oldState = level.getBlockState(worldPosition);
+            newState = PipeEntityBlock.getBlockStateForConnectionRemoved(oldState, dir);
+        }
+
+
+        level.setBlock(worldPosition, newState, Block.UPDATE_CLIENTS);
     }
 
     public void setInsert(Direction dir, boolean set){
@@ -258,6 +269,10 @@ public abstract class PipeEntity extends BlockEntity implements MenuProvider {
 
     public Direction getClickedDirection() {
         return this.clickedDirection;
+    }
+
+    public boolean hasConnection(){
+        return (insertMask | extractMask) != 0;
     }
 
     public boolean isInserting(Direction dir){

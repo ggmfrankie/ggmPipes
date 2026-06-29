@@ -17,11 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemPipeNetwork extends PipeNetwork<ItemPipeEntity> {
-    private List<ItemExtractConnection> extractConnections;
-    private List<ItemInsertConnection> insertConnections;
+    private final List<ItemExtractConnection> extractConnections;
+    private final List<ItemInsertConnection> insertConnections;
 
     private int cooldown;
-    private int maxCooldown;
+    private final int maxCooldown;
 
     public ItemPipeNetwork(){
         extractConnections = new ArrayList<>(16);
@@ -108,6 +108,10 @@ public class ItemPipeNetwork extends PipeNetwork<ItemPipeEntity> {
         BlockPos pos = entity.getBlockPos();
         extractConnections.removeIf(connection -> connection.getPipePos().equals(pos));
         insertConnections.removeIf(connection -> connection.getPipePos().equals(pos));
+    }
+
+    public boolean isEmpty(){
+        return extractConnections.isEmpty() && insertConnections.isEmpty();
     }
 
     public static abstract class ItemConnection {

@@ -26,10 +26,6 @@ public abstract class PipeEntityBlock extends PipeBlock implements EntityBlock {
         super(properties);
     }
 
-    public static BlockState getBlockStateForConnectionRemoved(BlockState state, Direction dir){
-        return state.setValue(getPropertyFromDirection(dir), false);
-    }
-
     private Direction getClickedArm(BlockState state, BlockHitResult hitResult) {
         Vec3 hitLoc = hitResult.getLocation();
 
